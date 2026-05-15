@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Jugador {
+  id         String             @id @default(uuid())
+  nombre     String             @db.VarChar(100)
+  posiciones String[]           @default([])
+  fotoUrl    String?            @map("foto_url")
+  createdAt  DateTime           @default(now()) @map("created_at")
+  partidos   PartidoJugador[]
+
+  @@map("jugador")
+}
+
+model Partido {
+  id           String            @id @default(uuid())
+  rival        String            @db.VarChar(100)
+  fecha        DateTime          @db.Date
+  torneo       String            @db.VarChar(100)
+  resultado    String?           @db.VarChar(20)
+  youtubeUrl   String?           @map("youtube_url")
+  planillaUrl  String?           @map("planilla_url")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  jugadores    PartidoJugador[]
+  comentarios  Comentario[]
+
+  @@map("partido")
+}
+
+model PartidoJugador {
+  id          String  @id @default(uuid())
+  jugadorId   String  @map("jugador_id")
+  partidoId   String  @map("partido_id")
+  goles       Int     @default(0)
+  asistencias Int     @default(0)
+  robos       Int     @default(0)
+  bloqueos    Int     @default(0)
+  exclusiones Int     @default(0)
+  turnovers   Int     @default(0)
+  tirosArco   Int     @default(0) @map("tiros_arco")
+  atajadas    Int     @default(0)
+  jugador     Jugador @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  partido     Partido @relation(fields: [partidoId], references: [id], onDelete: Cascade)
+
+  @@unique([jugadorId, partidoId])
+  @@map("partido_jugador")
+}
+
+model Comentario {
+  id           String   @id @default(uuid())
+  partidoId    String   @map("partido_id")
+  autorNombre  String   @map("autor_nombre") @db.VarChar(100)
+  texto        String   @db.Text
+  minuto       Int      @default(0)
+  createdAt    DateTime @default(now()) @map("created_at")
+  partido      Partido  @relation(fields: [partidoId], references: [id], onDelete: Cascade)
+
+  @@map("comentario")
+}
