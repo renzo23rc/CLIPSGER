@@ -22,9 +22,11 @@ export default function CommentSection({ comentarios: initialComments, partidoId
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombre.trim() || !texto.trim()) return;
+    if (!nombre.trim() || !texto.trim() || submitting) return;
 
     // Convertir minuto a segundos
     let minutoSegundos = 0;
@@ -37,17 +39,33 @@ export default function CommentSection({ comentarios: initialComments, partidoId
       }
     }
 
-    const newComment: Comentario = {
-      id: Date.now().toString(),
-      autorNombre: nombre.trim(),
-      texto: texto.trim(),
-      minuto: minutoSegundos,
-      createdAt: new Date().toISOString(),
-    };
+    setSubmitting(true);
 
-    setComments([...comments, newComment]);
-    setTexto("");
-    setMinuto("");
+    try {
+      const res = await fetch("/api/comentarios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          partidoId,
+          autorNombre: nombre.trim(),
+          texto: texto.trim(),
+          minuto: minutoSegundos,
+        }),
+      });
+
+      if (res.ok) {
+        const savedComment = await res.json();
+        setComments([savedComment, ...comments]);
+        setTexto("");
+        setMinuto("");
+      } else {
+        console.error("Error al guardar comentario");
+      }
+    } catch (error) {
+      console.error("Error al guardar comentario:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleMinutoClick = (seconds: number) => {
