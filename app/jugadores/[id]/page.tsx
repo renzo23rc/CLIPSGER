@@ -1,16 +1,59 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronLeft, Trophy, Target, Shield, Calendar, Activity } from "lucide-react";
-import { jugadoresMock, partidosMock } from "@/lib/data";
+import { Jugador, Partido } from "@/lib/data";
 
 export default function JugadorDetallePage() {
   const params = useParams();
   const jugadorId = params.id as string;
 
-  const jugador = jugadoresMock.find((j) => j.id === jugadorId);
+  const [jugador, setJugador] = useState<Jugador | null>(null);
+  const [partidos, setPartidos] = useState<Partido[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [jRes, pRes] = await Promise.all([
+          fetch("/api/jugadores"),
+          fetch("/api/partidos"),
+        ]);
+        const jData = await jRes.json();
+        const pData = await pRes.json();
+
+        const jugadores = Array.isArray(jData) ? jData : jData.jugadores || [];
+        const partidosArr = Array.isArray(pData) ? pData : [];
+
+        const found = jugadores.find((j: Jugador) => j.id === jugadorId);
+        setJugador(found || null);
+        setPartidos(partidosArr);
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [jugadorId]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-32 rounded-xl bg-muted" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="h-24 rounded-xl bg-muted" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!jugador) {
     return (
@@ -36,7 +79,7 @@ export default function JugadorDetallePage() {
   let atajadas = 0;
   let partidosJugados = 0;
 
-  const partidosDelJugador = partidosMock.filter((partido) => {
+  const partidosDelJugador = partidos.filter((partido) => {
     const stats = partido.jugadores.find((j) => j.jugador.id === jugador.id);
     if (stats) {
       goles += stats.goles;
@@ -54,11 +97,16 @@ export default function JugadorDetallePage() {
   });
 
   const posicionesColores: Record<string, string> = {
-    "Arquero": "bg-emerald-500/20 text-emerald-500",
-    "Defensa": "bg-blue-500/20 text-blue-500",
-    "Centro": "bg-purple-500/20 text-purple-500",
-    "Boya": "bg-yellow-500/20 text-yellow-500",
-    "Wing": "bg-orange-500/20 text-orange-500",
+    Arquero: "bg-emerald-500/20 text-emerald-500",
+    Defensa: "bg-blue-500/20 text-blue-500",
+    Centro: "bg-purple-500/20 text-purple-500",
+    Boya: "bg-yellow-500/20 text-yellow-500",
+    Wing: "bg-orange-500/20 text-orange-500",
+    "1": "bg-blue-500/20 text-blue-500",
+    "2": "bg-orange-500/20 text-orange-500",
+    "4": "bg-purple-500/20 text-purple-500",
+    "5": "bg-green-500/20 text-green-500",
+    "Marcador de boya": "bg-red-500/20 text-red-500",
   };
 
   return (
@@ -86,7 +134,11 @@ export default function JugadorDetallePage() {
       >
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-3xl font-bold text-primary-foreground">
-            {jugador.nombre.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+            {jugador.nombre
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .slice(0, 2)}
           </div>
           <div>
             <h1 className="text-2xl font-bold">{jugador.nombre}</h1>
@@ -149,46 +201,56 @@ export default function JugadorDetallePage() {
         transition={{ delay: 0.4 }}
       >
         <h2 className="text-xl font-bold mb-4">Historial de Partidos</h2>
-        <div className="space-y-3">
-          {partidosDelJugador.map((partido, index) => {
-            const stats = partido.jugadores.find((j) => j.jugador.id === jugador.id);
-            return (
-              <motion.div
-                key={partido.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + index * 0.05 }}
-              >
-                <Link href={`/partidos/${partido.id}`}>
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-muted/30 transition-colors">
-                    <div>
-                      <p className="font-medium">
-                        GER vs {partido.rival}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(partido.fecha).toLocaleDateString("es-AR", {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                        {" "}| {partido.torneo}
-                      </p>
+        {partidosDelJugador.length === 0 ? (
+          <p className="text-muted-foreground text-sm">Este jugador no tiene partidos registrados.</p>
+        ) : (
+          <div className="space-y-3">
+            {partidosDelJugador.map((partido, index) => {
+              const stats = partido.jugadores.find(
+                (j) => j.jugador.id === jugador.id
+              );
+              return (
+                <motion.div
+                  key={partido.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + index * 0.05 }}
+                >
+                  <Link href={`/partidos/${partido.id}`}>
+                    <div className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-muted/30 transition-colors">
+                      <div>
+                        <p className="font-medium">GER vs {partido.rival}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(partido.fecha).toLocaleDateString("es-AR", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          })}{" "}
+                          | {partido.torneo}
+                        </p>
+                      </div>
+                      <div className="flex gap-3 text-sm">
+                        {stats && (
+                          <>
+                            <span className="text-yellow-500 font-medium">
+                              {stats.goles}G
+                            </span>
+                            <span className="text-blue-400">
+                              {stats.asistencias}A
+                            </span>
+                            <span className="text-green-400">
+                              {stats.robos}R
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex gap-3 text-sm">
-                      {stats && (
-                        <>
-                          <span className="text-yellow-500 font-medium">{stats.goles}G</span>
-                          <span className="text-blue-400">{stats.asistencias}A</span>
-                          <span className="text-green-400">{stats.robos}R</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </motion.div>
     </div>
   );
