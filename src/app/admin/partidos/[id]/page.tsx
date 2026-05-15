@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { createMarker, createClip, deleteComment } from '@/app/admin/actions'
+import { createMarker, createClip, deleteComment, createAnnotation } from '@/app/admin/actions'
 import Link from 'next/link'
 
 interface Props {
@@ -75,6 +75,26 @@ export default async function ManageMatchPage({ params }: Props) {
             </a>
           ))}
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Anotación</h2>
+        <form action={createAnnotation} className="flex gap-2 items-end flex-wrap">
+          <input type="hidden" name="match_id" value={id} />
+          <label className="flex flex-col gap-1 text-xs">
+            Texto
+            <input name="body" className="p-1 border rounded w-64" required />
+          </label>
+          <label className="flex flex-col gap-1 text-xs">
+            Segundos
+            <input name="timestamp_seconds" type="number" className="p-1 border rounded w-24" required />
+          </label>
+          <label className="flex flex-col gap-1 text-xs">
+            Tags (coma)
+            <input name="tags" className="p-1 border rounded w-40" placeholder="contraataque, gol" />
+          </label>
+          <button type="submit" className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm">Agregar</button>
+        </form>
       </section>
 
       <section className="space-y-3">

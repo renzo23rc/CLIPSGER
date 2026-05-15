@@ -66,3 +66,61 @@ export async function deleteComment(formData: FormData) {
   revalidatePath(`/partidos/${matchId}`)
   revalidatePath(`/admin/partidos/${matchId}`)
 }
+
+export async function createAnnotation(formData: FormData) {
+  const supabase = await createClient()
+  
+  const matchId = formData.get('match_id') as string
+  const body = formData.get('body') as string
+  const timestamp = parseInt(formData.get('timestamp_seconds') as string)
+  const tagsRaw = formData.get('tags') as string
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  
+  const { data: editor } = await supabase
+    .from('editors')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+  
+  if (!editor) return
+  
+  const { data: annotation } = await supabase
+    .from('annotations')
+    .insert({
+      match_id: matchId,
+      editor_id: editor.id,
+      body,
+      timestamp_seconds: timestamp,
+    })
+    .select()
+    .single()
+  
+  if (annotation && tagsRaw) {
+    const tagNames = tagsRaw.split(',').map(t => t.trim()).filter(Boolean)
+    for (const tagName of tagNames) {
+      const { data: existingTag } = await supabase
+        .from('tags')
+        .select('id')
+        .eq('name', tagName)
+        .single()
+      
+      let tagId: string
+      if (existingTag) {
+        tagId = existingTag.id
+      } else {
+        const { data: newTag } = await supabase.from('tags').insert({ name: tagName }).select().single()
+        if (!newTag) continue
+        tagId = newTag.id
+      }
+      
+      await supabase.from('annotation_tags').insert({
+        annotation_id: annotation.id,
+        tag_id: tagId,
+      })
+    }
+  }
+  
+  revalidatePath(`/partidos/${matchId}`)
+}

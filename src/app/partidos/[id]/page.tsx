@@ -4,6 +4,7 @@ import { UnifiedPlayer } from '@/components/video/UnifiedPlayer'
 import { MatchTimeline } from '@/components/video/MatchTimeline'
 import { CommentSection } from '@/components/comments/CommentSection'
 import { MatchStats } from '@/components/stats/MatchStats'
+import { AnnotationSection } from '@/components/annotations/AnnotationSection'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -29,6 +30,7 @@ export default async function MatchPage({ params }: PageProps) {
     { data: enabled },
     { data: statValues },
     { data: stat65 },
+    { data: annotationsData },
   ] = await Promise.all([
     supabase.from('match_markers').select('*').eq('match_id', id).order('timestamp_seconds', { ascending: true }),
     supabase.from('clips').select('*').eq('match_id', id).order('start_seconds', { ascending: true }),
@@ -37,10 +39,19 @@ export default async function MatchPage({ params }: PageProps) {
     supabase.from('match_stats_enabled').select('definition_id').eq('match_id', id),
     supabase.from('match_stats_values').select('*').eq('match_id', id),
     supabase.from('match_stats_6v5').select('*').eq('match_id', id),
+    supabase.from('annotations').select('*, annotation_tags(tags(*))').eq('match_id', id),
   ])
 
   const enabledIds = new Set(enabled?.map(e => e.definition_id) || [])
   const enabledDefs = statDefs?.filter(d => enabledIds.has(d.id)) || []
+
+  const annotations = annotationsData?.map(a => ({
+    id: a.id,
+    body: a.body,
+    timestamp_seconds: a.timestamp_seconds,
+    editor_id: a.editor_id,
+    tags: (a.annotation_tags || []).map((at: any) => at.tags),
+  })) || []
 
   return (
     <div className="py-6 space-y-6">
@@ -58,6 +69,11 @@ export default async function MatchPage({ params }: PageProps) {
         markers={markers ?? []} 
         clips={clips ?? []} 
         currentTime={0}
+        onSeek={() => {}}
+      />
+
+      <AnnotationSection
+        annotations={annotations}
         onSeek={() => {}}
       />
 
