@@ -3,6 +3,15 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
+    // Verificar que el token de Vercel Blob esté configurado
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error("BLOB_READ_WRITE_TOKEN no está configurado");
+      return NextResponse.json(
+        { error: "Error de configuración del servidor (falta BLOB_READ_WRITE_TOKEN)" },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const partidoId = formData.get("partidoId") as string;
@@ -14,7 +23,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (file.type !== "application/pdf") {
+    // Validación más permisiva del tipo de archivo
+    const isPdf =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+
+    if (!isPdf) {
       return NextResponse.json(
         { error: "Solo se permiten archivos PDF" },
         { status: 400 }
@@ -41,10 +55,10 @@ export async function POST(request: Request) {
       url: blob.url,
       filename: safeName,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
-      { error: "Error al subir el archivo" },
+      { error: error?.message || "Error al subir el archivo" },
       { status: 500 }
     );
   }
