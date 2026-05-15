@@ -30,13 +30,11 @@ export async function createMarker(formData: FormData) {
   const label = formData.get('label') as string
   const timestamp = parseInt(formData.get('timestamp_seconds') as string)
   
-  const { error } = await supabase.from('match_markers').insert({
+  await supabase.from('match_markers').insert({
     match_id: matchId,
     label,
     timestamp_seconds: timestamp,
   })
-  
-  if (error) return { error: error.message }
   
   revalidatePath(`/partidos/${matchId}`)
 }
@@ -49,14 +47,12 @@ export async function createClip(formData: FormData) {
   const startSeconds = parseInt(formData.get('start_seconds') as string)
   const endSeconds = parseInt(formData.get('end_seconds') as string)
   
-  const { error } = await supabase.from('clips').insert({
+  await supabase.from('clips').insert({
     match_id: matchId,
     title,
     start_seconds: startSeconds,
     end_seconds: endSeconds,
   })
-  
-  if (error) return { error: error.message }
   
   revalidatePath(`/partidos/${matchId}`)
 }
