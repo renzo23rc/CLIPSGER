@@ -10,11 +10,17 @@ export async function createMatch(formData: FormData) {
   const title = formData.get('title') as string
   const videoUrl = formData.get('video_url') as string
   const videoType = formData.get('video_type') as string
+  const rivalName = formData.get('rival_name') as string
+  const matchDate = formData.get('match_date') as string
+  const description = formData.get('description') as string
   
   await supabase.from('matches').insert({
     title,
     video_url: videoUrl,
     video_type: videoType,
+    rival_name: rivalName || null,
+    match_date: matchDate || null,
+    description: description || null,
   })
   
   revalidatePath('/')

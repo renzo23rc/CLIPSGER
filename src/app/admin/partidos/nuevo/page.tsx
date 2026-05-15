@@ -9,7 +9,19 @@ export default function NewMatchPage() {
       <form action={createMatch} className="space-y-4">
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Título</span>
-          <input name="title" className="p-2 border rounded" placeholder="GER vs Rival — Fecha" required />
+          <input name="title" className="p-2 border rounded" placeholder="GER vs Rival" required />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Rival</span>
+          <input name="rival_name" className="p-2 border rounded" placeholder="Nombre del equipo rival" />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Fecha del partido</span>
+          <input name="match_date" type="date" className="p-2 border rounded" />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Descripción / contexto</span>
+          <textarea name="description" className="p-2 border rounded" rows={3} placeholder="Torneo, fase, resultado..." />
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Video URL/ID</span>

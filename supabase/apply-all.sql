@@ -199,3 +199,6 @@ CREATE POLICY "Editores insertan tags" ON tags FOR INSERT WITH CHECK (
 CREATE POLICY "Editores insertan annotation tags" ON annotation_tags FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM editors WHERE editors.user_id = (SELECT auth.uid()))
 );
+ALTER TABLE matches ADD COLUMN rival_name TEXT;
+ALTER TABLE matches ADD COLUMN match_date DATE;
+ALTER TABLE matches ADD COLUMN description TEXT;

@@ -55,7 +55,18 @@ export default async function MatchPage({ params }: PageProps) {
 
   return (
     <div className="py-6 space-y-6">
-      <h1 className="text-2xl font-bold">{match.title}</h1>
+      <div>
+        <h1 className="text-2xl font-bold">{match.title}</h1>
+        {match.rival_name && (
+          <p className="text-sm text-gray-500 mt-1">
+            vs {match.rival_name}
+            {match.match_date && ` · ${new Date(match.match_date).toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`}
+          </p>
+        )}
+        {match.description && (
+          <p className="text-sm text-gray-400 mt-1">{match.description}</p>
+        )}
+      </div>
       
       <UnifiedPlayer videoUrl={match.video_url} type={match.video_type} />
 

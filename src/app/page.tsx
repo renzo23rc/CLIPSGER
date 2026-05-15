@@ -31,12 +31,18 @@ export default async function Home() {
               href={`/partidos/${match.id}`}
               className="block bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all"
             >
-              <h2 className="font-semibold text-lg line-clamp-2 mb-2">{match.title}</h2>
+              <h2 className="font-semibold text-lg line-clamp-2 mb-1">{match.title}</h2>
+              <p className="text-xs text-gray-400 mb-2">
+                {match.match_date && new Date(match.match_date).toLocaleDateString('es-AR')}
+                {match.rival_name && ` · vs ${match.rival_name}`}
+              </p>
               <div className="flex justify-between items-center text-sm text-gray-500">
                 <span className="capitalize px-2 py-1 bg-gray-100 rounded-full text-xs">
                   {match.video_type}
                 </span>
-                <span>{new Date(match.created_at).toLocaleDateString()}</span>
+                {match.description && (
+                  <span className="text-xs text-gray-400 line-clamp-1 max-w-[140px]">{match.description}</span>
+                )}
               </div>
             </Link>
           ))}
