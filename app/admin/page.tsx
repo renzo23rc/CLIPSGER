@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Plus, Upload, Users, Calendar, Trophy, Trash2, MessageSquare, Edit, Save, X } from "lucide-react";
+import { Shield, Plus, Users, Calendar, Trophy, Trash2, MessageSquare, Edit, Save, X } from "lucide-react";
 import {
   createPartido,
   createJugador,
@@ -105,7 +105,6 @@ export default function AdminPage() {
     { id: "jugadores", label: "Agregar Jugador", icon: Users },
     { id: "stats", label: "Cargar Stats", icon: Trophy },
     { id: "comentarios", label: "Moderar Comentarios", icon: MessageSquare },
-    { id: "planilla", label: "Subir Planilla", icon: Upload },
   ];
 
   return (
@@ -160,7 +159,6 @@ export default function AdminPage() {
             {activeSection === "jugadores" && <AgregarJugadorForm />}
             {activeSection === "stats" && <CargarStatsForm />}
             {activeSection === "comentarios" && <ModerarComentariosForm />}
-            {activeSection === "planilla" && <SubirPlanillaForm />}
           </div>
         </motion.div>
       </div>
@@ -179,7 +177,9 @@ function GestionarPartidosForm() {
     torneo: "",
     resultado: "",
     youtubeUrl: "",
+    planillaUrl: "",
   });
+  const [planillaFile, setPlanillaFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -188,7 +188,7 @@ function GestionarPartidosForm() {
     setLoadingList(true);
     getPartidos().then((result) => {
       if (!cancelled && result.success) {
-        setPartidos((result.partidos as Partido[]) || []);
+        setPartidos(((result.partidos as unknown) as Partido[]) || []);
       }
       if (!cancelled) setLoadingList(false);
     });
@@ -199,12 +199,13 @@ function GestionarPartidosForm() {
 
   const refreshPartidos = () => {
     getPartidos().then((result) => {
-      if (result.success) setPartidos((result.partidos as Partido[]) || []);
+      if (result.success) setPartidos(((result.partidos as unknown) as Partido[]) || []);
     });
   };
 
   const resetForm = () => {
-    setFormData({ rival: "", fecha: "", torneo: "", resultado: "", youtubeUrl: "" });
+    setFormData({ rival: "", fecha: "", torneo: "", resultado: "", youtubeUrl: "", planillaUrl: "" });
+    setPlanillaFile(null);
     setEditingId(null);
   };
 
@@ -216,7 +217,9 @@ function GestionarPartidosForm() {
       torneo: partido.torneo,
       resultado: partido.resultado || "",
       youtubeUrl: partido.youtubeUrl || "",
+      planillaUrl: partido.planillaUrl || "",
     });
+    setPlanillaFile(null);
     setMessage("");
   };
 
@@ -237,8 +240,37 @@ function GestionarPartidosForm() {
     setLoading(true);
     setMessage("");
 
+    const dataToSend = { ...formData };
+
+    // Subir planilla si hay archivo seleccionado
+    if (planillaFile) {
+      try {
+        setMessage("📤 Subiendo planilla...");
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", planillaFile);
+        if (editingId) uploadFormData.append("partidoId", editingId);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+        const uploadResult = await uploadRes.json();
+
+        if (!uploadResult.success) {
+          setMessage("❌ Error al subir planilla: " + uploadResult.error);
+          setLoading(false);
+          return;
+        }
+        dataToSend.planillaUrl = uploadResult.url;
+      } catch (_err) {
+        setMessage("❌ Error de red al subir planilla");
+        setLoading(false);
+        return;
+      }
+    }
+
     if (editingId) {
-      const result = await updatePartido(editingId, formData);
+      const result = await updatePartido(editingId, dataToSend);
       if (result.success) {
         setMessage("✅ Partido actualizado exitosamente");
         resetForm();
@@ -247,7 +279,7 @@ function GestionarPartidosForm() {
         setMessage("❌ " + result.error);
       }
     } else {
-      const result = await createPartido(formData);
+      const result = await createPartido(dataToSend);
       if (result.success) {
         setMessage("✅ Partido creado exitosamente");
         resetForm();
@@ -344,6 +376,32 @@ function GestionarPartidosForm() {
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
+          <div className="md:col-span-2">
+            <label className="text-sm font-medium mb-1 block">Planilla del partido (PDF)</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={(e) => setPlanillaFile(e.target.files?.[0] || null)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
+              />
+              {formData.planillaUrl && !planillaFile && (
+                <a
+                  href={formData.planillaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 text-sm text-primary hover:underline"
+                >
+                  Ver actual
+                </a>
+              )}
+            </div>
+            {planillaFile && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Archivo seleccionado: {planillaFile.name} ({(planillaFile.size / 1024).toFixed(1)} KB)
+              </p>
+            )}
+          </div>
         </div>
 
         <button
@@ -379,6 +437,20 @@ function GestionarPartidosForm() {
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {p.torneo} {p.resultado ? `| Resultado: ${p.resultado}` : ""}
+                    {p.planillaUrl ? (
+                      <span className="ml-2">
+                        |{" "}
+                        <a
+                          href={p.planillaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          📄 Planilla
+                        </a>
+                      </span>
+                    ) : null}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -523,7 +595,7 @@ function CargarStatsForm() {
   useEffect(() => {
     async function loadData() {
       const [pResult, jResult] = await Promise.all([getPartidos(), getJugadores()]);
-      if (pResult.success) setPartidos(pResult.partidos || []);
+      if (pResult.success) setPartidos(((pResult.partidos as unknown) as Partido[]) || []);
       if (jResult.success) setJugadores(jResult.jugadores || []);
     }
     loadData();
@@ -665,7 +737,7 @@ function ModerarComentariosForm() {
     setLoading(true);
     getComentarios().then((result) => {
       if (!cancelled && result.success) {
-        setComentarios((result.comentarios as Comentario[]) || []);
+        setComentarios(((result.comentarios as unknown) as Comentario[]) || []);
       }
       if (!cancelled) setLoading(false);
     });
@@ -676,7 +748,7 @@ function ModerarComentariosForm() {
 
   const refreshComentarios = () => {
     getComentarios().then((result) => {
-      if (result.success) setComentarios((result.comentarios as Comentario[]) || []);
+      if (result.success) setComentarios(((result.comentarios as unknown) as Comentario[]) || []);
     });
   };
 
@@ -754,19 +826,4 @@ function ModerarComentariosForm() {
   );
 }
 
-function SubirPlanillaForm() {
-  return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold flex items-center gap-2">
-        <Upload className="h-5 w-5" />
-        Subir Planilla
-      </h2>
 
-      <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
-        <Upload className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-        <p className="text-muted-foreground mb-2">Funcionalidad en desarrollo</p>
-        <p className="text-xs text-muted-foreground">Próximamente: subida de planillas PDF/JPG</p>
-      </div>
-    </div>
-  );
-}

@@ -8,6 +8,7 @@ export async function createPartido(data: {
   torneo: string;
   resultado?: string;
   youtubeUrl?: string;
+  planillaUrl?: string;
 }) {
   try {
     const partido = await prisma.partido.create({
@@ -17,6 +18,7 @@ export async function createPartido(data: {
         torneo: data.torneo,
         resultado: data.resultado || null,
         youtubeUrl: data.youtubeUrl || null,
+        planillaUrl: data.planillaUrl || null,
       },
     });
     return { success: true, partido };
@@ -118,6 +120,7 @@ export async function updatePartido(
     torneo: string;
     resultado?: string;
     youtubeUrl?: string;
+    planillaUrl?: string;
   }
 ) {
   try {
@@ -129,6 +132,7 @@ export async function updatePartido(
         torneo: data.torneo,
         resultado: data.resultado || null,
         youtubeUrl: data.youtubeUrl || null,
+        planillaUrl: data.planillaUrl || null,
       },
     });
     return { success: true, partido };
