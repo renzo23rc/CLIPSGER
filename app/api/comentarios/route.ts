@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   try {
@@ -12,9 +13,11 @@ export async function GET(request: Request) {
       );
     }
 
-    // TODO: Reemplazar con Prisma cuando la DB esté configurada
-    // const comentarios = await prisma.comentario.findMany({...})
-    return NextResponse.json([]);
+    const comentarios = await prisma.comentario.findMany({
+      where: { partidoId },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(comentarios);
   } catch (error) {
     return NextResponse.json(
       { error: "Error al obtener comentarios" },
@@ -26,9 +29,15 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    // TODO: Reemplazar con Prisma cuando la DB esté configurada
-    // const comentario = await prisma.comentario.create({...})
-    return NextResponse.json({ id: Date.now().toString(), ...body });
+    const comentario = await prisma.comentario.create({
+      data: {
+        partidoId: body.partidoId,
+        autorNombre: body.autorNombre,
+        texto: body.texto,
+        minuto: body.minuto || 0,
+      },
+    });
+    return NextResponse.json(comentario);
   } catch (error) {
     return NextResponse.json(
       { error: "Error al crear comentario" },
