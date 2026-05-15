@@ -11,13 +11,11 @@ export async function createMatch(formData: FormData) {
   const videoUrl = formData.get('video_url') as string
   const videoType = formData.get('video_type') as string
   
-  const { error } = await supabase.from('matches').insert({
+  await supabase.from('matches').insert({
     title,
     video_url: videoUrl,
     video_type: videoType,
   })
-  
-  if (error) return { error: error.message }
   
   revalidatePath('/')
   redirect('/')

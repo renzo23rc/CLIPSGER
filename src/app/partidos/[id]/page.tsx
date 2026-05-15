@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { UnifiedPlayer } from '@/components/video/UnifiedPlayer'
 import { MatchTimeline } from '@/components/video/MatchTimeline'
 import { CommentSection } from '@/components/comments/CommentSection'
+import { MatchStats } from '@/components/stats/MatchStats'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -24,17 +25,34 @@ export default async function MatchPage({ params }: PageProps) {
     { data: markers },
     { data: clips },
     { data: commentsData },
+    { data: statDefs },
+    { data: enabled },
+    { data: statValues },
+    { data: stat65 },
   ] = await Promise.all([
     supabase.from('match_markers').select('*').eq('match_id', id).order('timestamp_seconds', { ascending: true }),
     supabase.from('clips').select('*').eq('match_id', id).order('start_seconds', { ascending: true }),
     supabase.from('comments').select('*').eq('match_id', id).order('timestamp_seconds', { ascending: true }).order('created_at', { ascending: true }),
+    supabase.from('match_stats_definition').select('*').order('display_order'),
+    supabase.from('match_stats_enabled').select('definition_id').eq('match_id', id),
+    supabase.from('match_stats_values').select('*').eq('match_id', id),
+    supabase.from('match_stats_6v5').select('*').eq('match_id', id),
   ])
+
+  const enabledIds = new Set(enabled?.map(e => e.definition_id) || [])
+  const enabledDefs = statDefs?.filter(d => enabledIds.has(d.id)) || []
 
   return (
     <div className="py-6 space-y-6">
       <h1 className="text-2xl font-bold">{match.title}</h1>
       
       <UnifiedPlayer videoUrl={match.video_url} type={match.video_type} />
+
+      <MatchStats 
+        definitions={enabledDefs}
+        values={statValues ?? []}
+        sixFive={stat65 ?? []}
+      />
       
       <MatchTimeline 
         markers={markers ?? []} 
