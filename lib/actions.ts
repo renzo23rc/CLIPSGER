@@ -109,3 +109,72 @@ export async function getJugadores() {
     return { success: false, error: "Error al obtener jugadores" };
   }
 }
+
+export async function updatePartido(
+  id: string,
+  data: {
+    rival: string;
+    fecha: string;
+    torneo: string;
+    resultado?: string;
+    youtubeUrl?: string;
+  }
+) {
+  try {
+    const partido = await prisma.partido.update({
+      where: { id },
+      data: {
+        rival: data.rival,
+        fecha: new Date(data.fecha),
+        torneo: data.torneo,
+        resultado: data.resultado || null,
+        youtubeUrl: data.youtubeUrl || null,
+      },
+    });
+    return { success: true, partido };
+  } catch (error) {
+    console.error("Error updating partido:", error);
+    return { success: false, error: "Error al actualizar partido" };
+  }
+}
+
+export async function deletePartido(id: string) {
+  try {
+    await prisma.partido.delete({
+      where: { id },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting partido:", error);
+    return { success: false, error: "Error al eliminar partido" };
+  }
+}
+
+export async function getComentarios() {
+  try {
+    const comentarios = await prisma.comentario.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        partido: {
+          select: { rival: true, fecha: true },
+        },
+      },
+    });
+    return { success: true, comentarios };
+  } catch (error) {
+    console.error("Error fetching comentarios:", error);
+    return { success: false, error: "Error al obtener comentarios" };
+  }
+}
+
+export async function deleteComentario(id: string) {
+  try {
+    await prisma.comentario.delete({
+      where: { id },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting comentario:", error);
+    return { success: false, error: "Error al eliminar comentario" };
+  }
+}

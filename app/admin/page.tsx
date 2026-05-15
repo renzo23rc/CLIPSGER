@@ -1,9 +1,49 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Shield, Plus, Upload, Users, Calendar, Trophy } from "lucide-react";
-import { createPartido, createJugador, createPartidoJugador, getPartidos, getJugadores } from "@/lib/actions";
+import { motion, AnimatePresence } from "framer-motion";
+import { Shield, Plus, Upload, Users, Calendar, Trophy, Trash2, MessageSquare, Edit, Save, X } from "lucide-react";
+import {
+  createPartido,
+  createJugador,
+  createPartidoJugador,
+  getPartidos,
+  getJugadores,
+  updatePartido,
+  deletePartido,
+  getComentarios,
+  deleteComentario,
+} from "@/lib/actions";
+
+interface Partido {
+  id: string;
+  rival: string;
+  fecha: string;
+  torneo: string;
+  resultado: string | null;
+  youtubeUrl: string | null;
+  planillaUrl: string | null;
+  createdAt: string;
+}
+
+interface Jugador {
+  id: string;
+  nombre: string;
+  posiciones: string[];
+}
+
+interface Comentario {
+  id: string;
+  partidoId: string;
+  autorNombre: string;
+  texto: string;
+  minuto: number;
+  createdAt: string;
+  partido: {
+    rival: string;
+    fecha: string;
+  };
+}
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,9 +73,7 @@ export default function AdminPage() {
                 <Shield className="h-8 w-8 text-primary" />
               </div>
               <h1 className="text-2xl font-bold">Panel de Administración</h1>
-              <p className="text-muted-foreground mt-1">
-                Waterpolo GER
-              </p>
+              <p className="text-muted-foreground mt-1">Waterpolo GER</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
@@ -63,19 +101,16 @@ export default function AdminPage() {
   }
 
   const sections = [
-    { id: "partidos", label: "Cargar Partido", icon: Calendar },
+    { id: "partidos", label: "Gestionar Partidos", icon: Calendar },
     { id: "jugadores", label: "Agregar Jugador", icon: Users },
     { id: "stats", label: "Cargar Stats", icon: Trophy },
+    { id: "comentarios", label: "Moderar Comentarios", icon: MessageSquare },
     { id: "planilla", label: "Subir Planilla", icon: Upload },
   ];
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Shield className="h-7 w-7 text-primary" />
@@ -121,9 +156,10 @@ export default function AdminPage() {
           className="lg:col-span-3"
         >
           <div className="rounded-xl border border-border bg-card p-6">
-            {activeSection === "partidos" && <CargarPartidoForm />}
+            {activeSection === "partidos" && <GestionarPartidosForm />}
             {activeSection === "jugadores" && <AgregarJugadorForm />}
             {activeSection === "stats" && <CargarStatsForm />}
+            {activeSection === "comentarios" && <ModerarComentariosForm />}
             {activeSection === "planilla" && <SubirPlanillaForm />}
           </div>
         </motion.div>
@@ -132,7 +168,11 @@ export default function AdminPage() {
   );
 }
 
-function CargarPartidoForm() {
+function GestionarPartidosForm() {
+  const [partidos, setPartidos] = useState<Partido[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     rival: "",
     fecha: "",
@@ -143,100 +183,226 @@ function CargarPartidoForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingList(true);
+    getPartidos().then((result) => {
+      if (!cancelled && result.success) {
+        setPartidos((result.partidos as Partido[]) || []);
+      }
+      if (!cancelled) setLoadingList(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refreshPartidos = () => {
+    getPartidos().then((result) => {
+      if (result.success) setPartidos((result.partidos as Partido[]) || []);
+    });
+  };
+
+  const resetForm = () => {
+    setFormData({ rival: "", fecha: "", torneo: "", resultado: "", youtubeUrl: "" });
+    setEditingId(null);
+  };
+
+  const handleEdit = (partido: Partido) => {
+    setEditingId(partido.id);
+    setFormData({
+      rival: partido.rival,
+      fecha: partido.fecha.split("T")[0],
+      torneo: partido.torneo,
+      resultado: partido.resultado || "",
+      youtubeUrl: partido.youtubeUrl || "",
+    });
+    setMessage("");
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Seguro que querés eliminar este partido? Se borrarán también sus estadísticas y comentarios.")) return;
+    const result = await deletePartido(id);
+    if (result.success) {
+      setMessage("✅ Partido eliminado");
+      refreshPartidos();
+      if (editingId === id) resetForm();
+    } else {
+      setMessage("❌ " + result.error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    const result = await createPartido(formData);
-
-    if (result.success) {
-      setMessage("✅ Partido creado exitosamente");
-      setFormData({ rival: "", fecha: "", torneo: "", resultado: "", youtubeUrl: "" });
+    if (editingId) {
+      const result = await updatePartido(editingId, formData);
+      if (result.success) {
+        setMessage("✅ Partido actualizado exitosamente");
+        resetForm();
+        refreshPartidos();
+      } else {
+        setMessage("❌ " + result.error);
+      }
     } else {
-      setMessage("❌ " + result.error);
+      const result = await createPartido(formData);
+      if (result.success) {
+        setMessage("✅ Partido creado exitosamente");
+        resetForm();
+        refreshPartidos();
+      } else {
+        setMessage("❌ " + result.error);
+      }
     }
 
     setLoading(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <h2 className="text-xl font-bold flex items-center gap-2">
-        <Plus className="h-5 w-5" />
-        Nuevo Partido
-      </h2>
-      
-      {message && (
-        <div className={`rounded-lg px-4 py-2 text-sm ${message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"}`}>
-          {message}
+    <div className="space-y-8">
+      {/* Formulario */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            {editingId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+            {editingId ? "Editar Partido" : "Nuevo Partido"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+            >
+              <X className="h-4 w-4" />
+              Cancelar edición
+            </button>
+          )}
         </div>
-      )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className="text-sm font-medium mb-1 block">Rival *</label>
-          <input
-            type="text"
-            required
-            value={formData.rival}
-            onChange={(e) => setFormData({ ...formData, rival: e.target.value })}
-            placeholder="Ej: Club Atlético River Plate"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+        {message && (
+          <div
+            className={`rounded-lg px-4 py-2 text-sm ${
+              message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+            }`}
+          >
+            {message}
+          </div>
+        )}
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium mb-1 block">Rival *</label>
+            <input
+              type="text"
+              required
+              value={formData.rival}
+              onChange={(e) => setFormData({ ...formData, rival: e.target.value })}
+              placeholder="Ej: Club Atlético River Plate"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">Fecha *</label>
+            <input
+              type="date"
+              required
+              value={formData.fecha}
+              onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">Torneo *</label>
+            <input
+              type="text"
+              required
+              value={formData.torneo}
+              onChange={(e) => setFormData({ ...formData, torneo: e.target.value })}
+              placeholder="Ej: Liga Nacional"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">Resultado</label>
+            <input
+              type="text"
+              value={formData.resultado}
+              onChange={(e) => setFormData({ ...formData, resultado: e.target.value })}
+              placeholder="Ej: 8-5"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-sm font-medium mb-1 block">URL de YouTube</label>
+            <input
+              type="url"
+              value={formData.youtubeUrl}
+              onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
         </div>
-        <div>
-          <label className="text-sm font-medium mb-1 block">Fecha *</label>
-          <input
-            type="date"
-            required
-            value={formData.fecha}
-            onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium mb-1 block">Torneo *</label>
-          <input
-            type="text"
-            required
-            value={formData.torneo}
-            onChange={(e) => setFormData({ ...formData, torneo: e.target.value })}
-            placeholder="Ej: Liga Nacional"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium mb-1 block">Resultado</label>
-          <input
-            type="text"
-            value={formData.resultado}
-            onChange={(e) => setFormData({ ...formData, resultado: e.target.value })}
-            placeholder="Ej: 8-5"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="text-sm font-medium mb-1 block">URL de YouTube</label>
-          <input
-            type="url"
-            value={formData.youtubeUrl}
-            onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
-            placeholder="https://www.youtube.com/watch?v=..."
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+        >
+          {editingId ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {loading ? (editingId ? "Guardando..." : "Creando...") : editingId ? "Guardar Cambios" : "Crear Partido"}
+        </button>
+      </form>
+
+      {/* Lista de partidos */}
+      <div className="border-t border-border pt-6">
+        <h3 className="text-lg font-bold mb-4">Partidos Cargados</h3>
+        {loadingList ? (
+          <p className="text-muted-foreground text-sm">Cargando partidos...</p>
+        ) : partidos.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No hay partidos cargados.</p>
+        ) : (
+          <div className="space-y-3">
+            {partidos.map((p: Partido) => (
+              <div
+                key={p.id}
+                className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
+              >
+                <div>
+                  <p className="font-medium">
+                    GER vs {p.rival}{" "}
+                    <span className="text-muted-foreground text-sm">
+                      — {new Date(p.fecha).toLocaleDateString("es-AR")}
+                    </span>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {p.torneo} {p.resultado ? `| Resultado: ${p.resultado}` : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(p)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted transition-colors"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-500/10 px-3 py-1.5 text-sm text-red-600 hover:bg-red-500/20 transition-colors"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-      >
-        <Plus className="h-4 w-4" />
-        {loading ? "Creando..." : "Crear Partido"}
-      </button>
-    </form>
+    </div>
   );
 }
 
@@ -282,11 +448,15 @@ function AgregarJugadorForm() {
       </h2>
 
       {message && (
-        <div className={`rounded-lg px-4 py-2 text-sm ${message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"}`}>
+        <div
+          className={`rounded-lg px-4 py-2 text-sm ${
+            message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+          }`}
+        >
           {message}
         </div>
       )}
-      
+
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <label className="text-sm font-medium mb-1 block">Nombre completo *</label>
@@ -333,8 +503,8 @@ function AgregarJugadorForm() {
 }
 
 function CargarStatsForm() {
-  const [partidos, setPartidos] = useState<any[]>([]);
-  const [jugadores, setJugadores] = useState<any[]>([]);
+  const [partidos, setPartidos] = useState<Partido[]>([]);
+  const [jugadores, setJugadores] = useState<Jugador[]>([]);
   const [selectedPartido, setSelectedPartido] = useState("");
   const [selectedJugador, setSelectedJugador] = useState("");
   const [stats, setStats] = useState({
@@ -378,8 +548,14 @@ function CargarStatsForm() {
     if (result.success) {
       setMessage("✅ Estadísticas guardadas");
       setStats({
-        goles: 0, asistencias: 0, robos: 0, bloqueos: 0,
-        exclusiones: 0, turnovers: 0, tirosArco: 0, atajadas: 0,
+        goles: 0,
+        asistencias: 0,
+        robos: 0,
+        bloqueos: 0,
+        exclusiones: 0,
+        turnovers: 0,
+        tirosArco: 0,
+        atajadas: 0,
       });
     } else {
       setMessage("❌ " + result.error);
@@ -396,11 +572,15 @@ function CargarStatsForm() {
       </h2>
 
       {message && (
-        <div className={`rounded-lg px-4 py-2 text-sm ${message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"}`}>
+        <div
+          className={`rounded-lg px-4 py-2 text-sm ${
+            message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+          }`}
+        >
           {message}
         </div>
       )}
-      
+
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <label className="text-sm font-medium mb-1 block">Partido *</label>
@@ -411,7 +591,7 @@ function CargarStatsForm() {
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="">Seleccionar partido...</option>
-            {partidos.map((p: any) => (
+            {partidos.map((p: Partido) => (
               <option key={p.id} value={p.id}>
                 GER vs {p.rival} - {new Date(p.fecha).toLocaleDateString("es-AR")}
               </option>
@@ -427,7 +607,7 @@ function CargarStatsForm() {
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="">Seleccionar jugador...</option>
-            {jugadores.map((j: any) => (
+            {jugadores.map((j: Jugador) => (
               <option key={j.id} value={j.id}>
                 {j.nombre} - {j.posiciones.join(", ")}
               </option>
@@ -475,6 +655,105 @@ function CargarStatsForm() {
   );
 }
 
+function ModerarComentariosForm() {
+  const [comentarios, setComentarios] = useState<Comentario[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getComentarios().then((result) => {
+      if (!cancelled && result.success) {
+        setComentarios((result.comentarios as Comentario[]) || []);
+      }
+      if (!cancelled) setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refreshComentarios = () => {
+    getComentarios().then((result) => {
+      if (result.success) setComentarios((result.comentarios as Comentario[]) || []);
+    });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Seguro que querés eliminar este comentario?")) return;
+    const result = await deleteComentario(id);
+    if (result.success) {
+      setMessage("✅ Comentario eliminado");
+      refreshComentarios();
+    } else {
+      setMessage("❌ " + result.error);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold flex items-center gap-2">
+        <MessageSquare className="h-5 w-5" />
+        Moderar Comentarios
+      </h2>
+
+      {message && (
+        <div
+          className={`rounded-lg px-4 py-2 text-sm ${
+            message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+
+      {loading ? (
+        <p className="text-muted-foreground text-sm">Cargando comentarios...</p>
+      ) : comentarios.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No hay comentarios para moderar.</p>
+      ) : (
+        <div className="space-y-3">
+          <AnimatePresence>
+            {comentarios.map((c: Comentario) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0 }}
+                className="rounded-lg border border-border bg-background p-4"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">{c.autorNombre}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(c.createdAt).toLocaleDateString("es-AR")}{" "}
+                        {new Date(c.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Partido: GER vs {c.partido.rival} ({new Date(c.partido.fecha).toLocaleDateString("es-AR")})
+                    </p>
+                    <p className="text-sm">{c.texto}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-500/10 px-3 py-1.5 text-sm text-red-600 hover:bg-red-500/20 transition-colors shrink-0"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Eliminar
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SubirPlanillaForm() {
   return (
     <div className="space-y-6">
@@ -482,15 +761,11 @@ function SubirPlanillaForm() {
         <Upload className="h-5 w-5" />
         Subir Planilla
       </h2>
-      
+
       <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
         <Upload className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-        <p className="text-muted-foreground mb-2">
-          Funcionalidad en desarrollo
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Próximamente: subida de planillas PDF/JPG
-        </p>
+        <p className="text-muted-foreground mb-2">Funcionalidad en desarrollo</p>
+        <p className="text-xs text-muted-foreground">Próximamente: subida de planillas PDF/JPG</p>
       </div>
     </div>
   );
