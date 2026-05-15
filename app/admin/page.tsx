@@ -18,12 +18,12 @@ import {
 interface Partido {
   id: string;
   rival: string;
-  fecha: string;
+  fecha: string | Date;
   torneo: string;
   resultado: string | null;
   youtubeUrl: string | null;
   planillaUrl: string | null;
-  createdAt: string;
+  createdAt: string | Date;
 }
 
 interface Jugador {
@@ -213,7 +213,7 @@ function GestionarPartidosForm() {
     setEditingId(partido.id);
     setFormData({
       rival: partido.rival,
-      fecha: partido.fecha.split("T")[0],
+      fecha: new Date(partido.fecha).toISOString().split("T")[0],
       torneo: partido.torneo,
       resultado: partido.resultado || "",
       youtubeUrl: partido.youtubeUrl || "",
