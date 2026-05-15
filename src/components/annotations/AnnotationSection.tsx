@@ -13,7 +13,7 @@ interface Annotation {
 
 interface Props {
   annotations: Annotation[]
-  onSeek: (seconds: number) => void
+  onSeek?: (seconds: number) => void
 }
 
 function fmt(seconds: number): string {
@@ -36,7 +36,7 @@ export function AnnotationSection({ annotations, onSeek }: Props) {
             <div className="flex gap-2 items-baseline flex-wrap">
               <button
                 type="button"
-                onClick={() => onSeek(a.timestamp_seconds)}
+                onClick={() => onSeek?.(a.timestamp_seconds)}
                 className="text-xs text-blue-600 hover:underline font-mono font-bold"
               >
                 [{fmt(a.timestamp_seconds)}]

@@ -17,7 +17,7 @@ interface Props {
   markers: Marker[]
   clips: Clip[]
   currentTime: number
-  onSeek: (seconds: number) => void
+  onSeek?: (seconds: number) => void
 }
 
 function formatTime(seconds: number): string {
@@ -40,7 +40,7 @@ export function MatchTimeline({ markers, clips, currentTime, onSeek }: Props) {
             {markers.map(m => (
               <button
                 key={m.id}
-                onClick={() => onSeek(m.timestamp_seconds)}
+                onClick={() => onSeek?.(m.timestamp_seconds)}
                 className={`text-xs px-3 py-1 rounded-full border transition-colors ${
                   currentTime >= m.timestamp_seconds
                     ? 'bg-blue-100 border-blue-300 text-blue-800'

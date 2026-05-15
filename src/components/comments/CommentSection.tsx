@@ -15,7 +15,7 @@ interface Comment {
 interface Props {
   comments: Comment[]
   matchId: string
-  onSeek: (seconds: number) => void
+  onSeek?: (seconds: number) => void
 }
 
 function fmt(seconds: number): string {
@@ -99,7 +99,7 @@ export function CommentSection({ comments, matchId, onSeek }: Props) {
           />
           <button
             type="button"
-            onClick={() => onSeek(currentTimestamp)}
+            onClick={() => onSeek?.(currentTimestamp)}
             className="text-xs text-blue-600 hover:underline"
           >
             Ir a {fmt(currentTimestamp)}
@@ -127,7 +127,7 @@ export function CommentSection({ comments, matchId, onSeek }: Props) {
           <div key={c.id} className="space-y-1">
             <div className="bg-white border rounded p-3">
               <div className="flex gap-2 items-baseline">
-                <button type="button" onClick={() => onSeek(c.timestamp_seconds)} className="text-xs text-blue-600 hover:underline font-mono">
+                <button type="button" onClick={() => onSeek?.(c.timestamp_seconds)} className="text-xs text-blue-600 hover:underline font-mono">
                   [{fmt(c.timestamp_seconds)}]
                 </button>
                 <span className="text-xs text-gray-400">{c.author_name}</span>
@@ -144,7 +144,7 @@ export function CommentSection({ comments, matchId, onSeek }: Props) {
             {c.replies?.map(r => (
               <div key={r.id} className="bg-gray-50 border rounded p-3 ml-6">
                 <div className="flex gap-2 items-baseline">
-                  <button type="button" onClick={() => onSeek(r.timestamp_seconds)} className="text-xs text-blue-600 hover:underline font-mono">
+                  <button type="button" onClick={() => onSeek?.(r.timestamp_seconds)} className="text-xs text-blue-600 hover:underline font-mono">
                     [{fmt(r.timestamp_seconds)}]
                   </button>
                   <span className="text-xs text-gray-400">{r.author_name}</span>

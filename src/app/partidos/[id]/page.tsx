@@ -80,18 +80,15 @@ export default async function MatchPage({ params }: PageProps) {
         markers={markers ?? []} 
         clips={clips ?? []} 
         currentTime={0}
-        onSeek={() => {}}
       />
 
       <AnnotationSection
         annotations={annotations}
-        onSeek={() => {}}
       />
 
       <CommentSection 
         comments={commentsData ?? []}
         matchId={id}
-        onSeek={() => {}}
       />
     </div>
   )
