@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Trophy, Users, Calendar, Settings } from "lucide-react";
@@ -24,9 +25,14 @@ export default function Header() {
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
-            G
-          </div>
+          <Image
+            src="/escudo.jpeg"
+            alt="Escudo GER"
+            width={40}
+            height={40}
+            className="rounded-lg object-cover"
+            priority
+          />
           <div className="hidden sm:block">
             <h1 className="text-lg font-bold leading-tight">Waterpolo GER</h1>
             <p className="text-xs text-muted-foreground leading-tight">Gimnasia y Esgrima de Rosario</p>

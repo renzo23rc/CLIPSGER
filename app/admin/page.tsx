@@ -11,6 +11,8 @@ import {
   getJugadores,
   updatePartido,
   deletePartido,
+  updateJugador,
+  deleteJugador,
   getComentarios,
   deleteComentario,
 } from "@/lib/actions";
@@ -102,7 +104,7 @@ export default function AdminPage() {
 
   const sections = [
     { id: "partidos", label: "Gestionar Partidos", icon: Calendar },
-    { id: "jugadores", label: "Agregar Jugador", icon: Users },
+    { id: "jugadores", label: "Gestionar Jugadores", icon: Users },
     { id: "stats", label: "Cargar Stats", icon: Trophy },
     { id: "comentarios", label: "Moderar Comentarios", icon: MessageSquare },
   ];
@@ -156,7 +158,7 @@ export default function AdminPage() {
         >
           <div className="rounded-xl border border-border bg-card p-6">
             {activeSection === "partidos" && <GestionarPartidosForm />}
-            {activeSection === "jugadores" && <AgregarJugadorForm />}
+            {activeSection === "jugadores" && <GestionarJugadoresForm />}
             {activeSection === "stats" && <CargarStatsForm />}
             {activeSection === "comentarios" && <ModerarComentariosForm />}
           </div>
@@ -478,13 +480,63 @@ function GestionarPartidosForm() {
   );
 }
 
-function AgregarJugadorForm() {
+function GestionarJugadoresForm() {
+  const [jugadores, setJugadores] = useState<Jugador[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     nombre: "",
     posiciones: [] as string[],
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingList(true);
+    getJugadores().then((result) => {
+      if (!cancelled && result.success) {
+        setJugadores(result.jugadores || []);
+      }
+      if (!cancelled) setLoadingList(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refreshJugadores = () => {
+    getJugadores().then((result) => {
+      if (result.success) setJugadores(result.jugadores || []);
+    });
+  };
+
+  const resetForm = () => {
+    setFormData({ nombre: "", posiciones: [] });
+    setEditingId(null);
+  };
+
+  const handleEdit = (jugador: Jugador) => {
+    setEditingId(jugador.id);
+    setFormData({
+      nombre: jugador.nombre,
+      posiciones: jugador.posiciones,
+    });
+    setMessage("");
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Seguro que querés eliminar este jugador? Se borrarán también sus estadísticas de partidos.")) return;
+    const result = await deleteJugador(id);
+    if (result.success) {
+      setMessage("✅ Jugador eliminado");
+      refreshJugadores();
+      if (editingId === id) resetForm();
+    } else {
+      setMessage("❌ " + result.error);
+    }
+  };
 
   const handlePosicionChange = (posicion: string) => {
     setFormData((prev) => ({
@@ -500,77 +552,145 @@ function AgregarJugadorForm() {
     setLoading(true);
     setMessage("");
 
-    const result = await createJugador(formData);
-
-    if (result.success) {
-      setMessage("✅ Jugador agregado exitosamente");
-      setFormData({ nombre: "", posiciones: [] });
+    if (editingId) {
+      const result = await updateJugador(editingId, formData);
+      if (result.success) {
+        setMessage("✅ Jugador actualizado exitosamente");
+        resetForm();
+        refreshJugadores();
+      } else {
+        setMessage("❌ " + result.error);
+      }
     } else {
-      setMessage("❌ " + result.error);
+      const result = await createJugador(formData);
+      if (result.success) {
+        setMessage("✅ Jugador agregado exitosamente");
+        resetForm();
+        refreshJugadores();
+      } else {
+        setMessage("❌ " + result.error);
+      }
     }
 
     setLoading(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <h2 className="text-xl font-bold flex items-center gap-2">
-        <Plus className="h-5 w-5" />
-        Nuevo Jugador
-      </h2>
-
-      {message && (
-        <div
-          className={`rounded-lg px-4 py-2 text-sm ${
-            message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
-          }`}
-        >
-          {message}
+    <div className="space-y-8">
+      {/* Formulario */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            {editingId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+            {editingId ? "Editar Jugador" : "Nuevo Jugador"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+            >
+              <X className="h-4 w-4" />
+              Cancelar edición
+            </button>
+          )}
         </div>
-      )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className="text-sm font-medium mb-1 block">Nombre completo *</label>
-          <input
-            type="text"
-            required
-            value={formData.nombre}
-            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-            placeholder="Ej: Martín Pérez"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium mb-1 block">Posiciones *</label>
-          <div className="flex flex-wrap gap-2">
-            {["1", "2", "Marcador de boya", "4", "5", "Boya", "Arquero"].map((pos) => (
-              <button
-                key={pos}
-                type="button"
-                onClick={() => handlePosicionChange(pos)}
-                className={`rounded-lg px-3 py-1 text-sm border transition-colors ${
-                  formData.posiciones.includes(pos)
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card hover:bg-muted border-border"
-                }`}
-              >
-                {pos}
-              </button>
-            ))}
+        {message && (
+          <div
+            className={`rounded-lg px-4 py-2 text-sm ${
+              message.startsWith("✅") ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+            }`}
+          >
+            {message}
+          </div>
+        )}
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium mb-1 block">Nombre completo *</label>
+            <input
+              type="text"
+              required
+              value={formData.nombre}
+              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+              placeholder="Ej: Martín Pérez"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">Posiciones *</label>
+            <div className="flex flex-wrap gap-2">
+              {["1", "2", "Marcador de boya", "4", "5", "Boya", "Arquero"].map((pos) => (
+                <button
+                  key={pos}
+                  type="button"
+                  onClick={() => handlePosicionChange(pos)}
+                  className={`rounded-lg px-3 py-1 text-sm border transition-colors ${
+                    formData.posiciones.includes(pos)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card hover:bg-muted border-border"
+                  }`}
+                >
+                  {pos}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <button
-        type="submit"
-        disabled={loading || formData.posiciones.length === 0}
-        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-      >
-        <Plus className="h-4 w-4" />
-        {loading ? "Agregando..." : "Agregar Jugador"}
-      </button>
-    </form>
+        <button
+          type="submit"
+          disabled={loading || formData.posiciones.length === 0}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+        >
+          {editingId ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {loading ? (editingId ? "Guardando..." : "Agregando...") : editingId ? "Guardar Cambios" : "Agregar Jugador"}
+        </button>
+      </form>
+
+      {/* Lista de jugadores */}
+      <div className="border-t border-border pt-6">
+        <h3 className="text-lg font-bold mb-4">Jugadores Registrados</h3>
+        {loadingList ? (
+          <p className="text-muted-foreground text-sm">Cargando jugadores...</p>
+        ) : jugadores.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No hay jugadores registrados.</p>
+        ) : (
+          <div className="space-y-3">
+            {jugadores.map((j: Jugador) => (
+              <div
+                key={j.id}
+                className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
+              >
+                <div>
+                  <p className="font-medium">{j.nombre}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {j.posiciones.join(", ")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(j)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted transition-colors"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(j.id)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-500/10 px-3 py-1.5 text-sm text-red-600 hover:bg-red-500/20 transition-colors"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

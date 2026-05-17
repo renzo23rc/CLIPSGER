@@ -154,6 +154,40 @@ export async function deletePartido(id: string) {
   }
 }
 
+export async function updateJugador(
+  id: string,
+  data: {
+    nombre: string;
+    posiciones: string[];
+  }
+) {
+  try {
+    const jugador = await prisma.jugador.update({
+      where: { id },
+      data: {
+        nombre: data.nombre,
+        posiciones: data.posiciones,
+      },
+    });
+    return { success: true, jugador };
+  } catch (error) {
+    console.error("Error updating jugador:", error);
+    return { success: false, error: "Error al actualizar jugador" };
+  }
+}
+
+export async function deleteJugador(id: string) {
+  try {
+    await prisma.jugador.delete({
+      where: { id },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting jugador:", error);
+    return { success: false, error: "Error al eliminar jugador" };
+  }
+}
+
 export async function getComentarios() {
   try {
     const comentarios = await prisma.comentario.findMany({
