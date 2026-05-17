@@ -13,6 +13,7 @@ import {
   deletePartido,
   updateJugador,
   deleteJugador,
+  getPartidoJugadorStats,
   getComentarios,
   deleteComentario,
 } from "@/lib/actions";
@@ -710,7 +711,9 @@ function CargarStatsForm() {
     atajadas: 0,
   });
   const [loading, setLoading] = useState(false);
+  const [loadingStats, setLoadingStats] = useState(false);
   const [message, setMessage] = useState("");
+  const [statsExist, setStatsExist] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -720,6 +723,58 @@ function CargarStatsForm() {
     }
     loadData();
   }, []);
+
+  useEffect(() => {
+    async function loadExistingStats() {
+      if (!selectedPartido || !selectedJugador) {
+        setStatsExist(false);
+        setStats({
+          goles: 0,
+          asistencias: 0,
+          robos: 0,
+          bloqueos: 0,
+          exclusiones: 0,
+          turnovers: 0,
+          tirosArco: 0,
+          atajadas: 0,
+        });
+        return;
+      }
+
+      setLoadingStats(true);
+      const result = await getPartidoJugadorStats(selectedJugador, selectedPartido);
+      
+      if (result.success && result.stats) {
+        setStatsExist(true);
+        setStats({
+          goles: result.stats.goles,
+          asistencias: result.stats.asistencias,
+          robos: result.stats.robos,
+          bloqueos: result.stats.bloqueos,
+          exclusiones: result.stats.exclusiones,
+          turnovers: result.stats.turnovers,
+          tirosArco: result.stats.tirosArco,
+          atajadas: result.stats.atajadas,
+        });
+      } else {
+        setStatsExist(false);
+        setStats({
+          goles: 0,
+          asistencias: 0,
+          robos: 0,
+          bloqueos: 0,
+          exclusiones: 0,
+          turnovers: 0,
+          tirosArco: 0,
+          atajadas: 0,
+        });
+      }
+      
+      setLoadingStats(false);
+    }
+
+    loadExistingStats();
+  }, [selectedPartido, selectedJugador]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -738,17 +793,8 @@ function CargarStatsForm() {
     });
 
     if (result.success) {
-      setMessage("✅ Estadísticas guardadas");
-      setStats({
-        goles: 0,
-        asistencias: 0,
-        robos: 0,
-        bloqueos: 0,
-        exclusiones: 0,
-        turnovers: 0,
-        tirosArco: 0,
-        atajadas: 0,
-      });
+      setMessage(statsExist ? "✅ Estadísticas actualizadas" : "✅ Estadísticas guardadas");
+      setStatsExist(true);
     } else {
       setMessage("❌ " + result.error);
     }
@@ -770,6 +816,12 @@ function CargarStatsForm() {
           }`}
         >
           {message}
+        </div>
+      )}
+
+      {statsExist && (
+        <div className="rounded-lg px-4 py-2 text-sm bg-yellow-500/20 text-yellow-600">
+          ⚠️ Este jugador ya tiene estadísticas en este partido. Se sobreescribirán al guardar.
         </div>
       )}
 
@@ -809,7 +861,10 @@ function CargarStatsForm() {
       </div>
 
       <div className="rounded-lg border border-border p-4">
-        <h3 className="font-medium mb-4">Estadísticas</h3>
+        <h3 className="font-medium mb-4">
+          Estadísticas
+          {loadingStats && <span className="text-sm text-muted-foreground ml-2">(cargando...)</span>}
+        </h3>
         <div className="grid grid-cols-4 gap-3">
           {[
             { label: "Goles", key: "goles" },
@@ -837,11 +892,11 @@ function CargarStatsForm() {
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || loadingStats}
         className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
       >
-        <Plus className="h-4 w-4" />
-        {loading ? "Guardando..." : "Guardar Estadísticas"}
+        {statsExist ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+        {loading ? "Guardando..." : statsExist ? "Actualizar Estadísticas" : "Guardar Estadísticas"}
       </button>
     </form>
   );

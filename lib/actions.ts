@@ -59,8 +59,24 @@ export async function createPartidoJugador(data: {
   atajadas: number;
 }) {
   try {
-    const stats = await prisma.partidoJugador.create({
-      data: {
+    const stats = await prisma.partidoJugador.upsert({
+      where: {
+        jugadorId_partidoId: {
+          jugadorId: data.jugadorId,
+          partidoId: data.partidoId,
+        },
+      },
+      update: {
+        goles: data.goles,
+        asistencias: data.asistencias,
+        robos: data.robos,
+        bloqueos: data.bloqueos,
+        exclusiones: data.exclusiones,
+        turnovers: data.turnovers,
+        tirosArco: data.tirosArco,
+        atajadas: data.atajadas,
+      },
+      create: {
         jugadorId: data.jugadorId,
         partidoId: data.partidoId,
         goles: data.goles,
@@ -75,8 +91,25 @@ export async function createPartidoJugador(data: {
     });
     return { success: true, stats };
   } catch (error) {
-    console.error("Error creating stats:", error);
-    return { success: false, error: "Error al cargar estadísticas" };
+    console.error("Error saving stats:", error);
+    return { success: false, error: "Error al guardar estadísticas" };
+  }
+}
+
+export async function getPartidoJugadorStats(jugadorId: string, partidoId: string) {
+  try {
+    const stats = await prisma.partidoJugador.findUnique({
+      where: {
+        jugadorId_partidoId: {
+          jugadorId,
+          partidoId,
+        },
+      },
+    });
+    return { success: true, stats };
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    return { success: false, error: "Error al obtener estadísticas" };
   }
 }
 
