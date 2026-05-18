@@ -42,65 +42,7 @@ export default function HeroSection({
       {/* Decorative blur circles */}
       <div className="absolute -left-40 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute -right-40 top-1/3 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
-
-      {/* Animated Waves */}
-      <div className="absolute bottom-0 left-0 h-56 w-full overflow-hidden pointer-events-none">
-        {/* Wave 1 — dorado, lento */}
-        <div
-          className="absolute inset-0 animate-wave-slow"
-          style={{ animationDuration: "22s" }}
-        >
-          <svg
-            viewBox="0 0 2880 200"
-            className="h-56 w-[200%]"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M0,120 C240,200 480,40 720,120 C960,200 1200,40 1440,120 C1680,200 1920,40 2160,120 C2400,200 2640,40 2880,120 L2880,200 L0,200 Z"
-              fill="#c9a84c"
-              opacity="0.08"
-            />
-          </svg>
-        </div>
-
-        {/* Wave 2 — azul agua, medio */}
-        <div
-          className="absolute inset-0 animate-wave-medium"
-          style={{ animationDuration: "16s" }}
-        >
-          <svg
-            viewBox="0 0 2880 180"
-            className="h-56 w-[200%]"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M0,100 C360,180 720,20 1080,100 C1440,180 1800,20 2160,100 C2520,180 2880,100 2880,100 L2880,180 L0,180 Z"
-              fill="#0ea5e9"
-              opacity="0.1"
-            />
-          </svg>
-        </div>
-
-        {/* Wave 3 — dorado/agua mixto, rápido */}
-        <div
-          className="absolute inset-0 animate-wave-fast"
-          style={{ animationDuration: "10s" }}
-        >
-          <svg
-            viewBox="0 0 2880 160"
-            className="h-56 w-[200%]"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M0,80 C300,160 600,0 900,80 C1200,160 1500,0 1800,80 C2100,160 2400,0 2700,80 C2880,120 2880,160 2880,160 L0,160 Z"
-              fill="#c9a84c"
-              opacity="0.06"
-            />
-          </svg>
-        </div>
-      </div>
-
-      {/* Floating Bubbles */}
+      <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-background to-transparent" />
       {bubbles.map((b, i) => (
         <motion.div
           key={i}

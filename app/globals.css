@@ -53,22 +53,6 @@ body {
   color: var(--foreground);
 }
 
-/* Wave animations */
-@keyframes wave-slow {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes wave-medium {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes wave-fast {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

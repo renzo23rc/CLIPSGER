@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { TrendingUp, Users, CalendarDays } from "lucide-react";
 import MatchCard from "@/components/MatchCard";
@@ -80,7 +81,15 @@ export default function HomePage() {
 
       <div className="container mx-auto px-4 py-8 space-y-12">
         {/* Últimos Partidos */}
-        <section>
+        <section className="relative overflow-hidden rounded-2xl border border-border/50 p-8">
+          <Image
+            src="/header-bg.jpg"
+            alt=""
+            fill
+            className="object-cover opacity-10"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
+          <div className="relative z-10">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -106,10 +115,19 @@ export default function HomePage() {
             ))}
           </div>
         )}
+          </div>{/* end z-10 */}
       </section>
 
       {/* Top Goleadores */}
-      <section>
+      <section className="relative overflow-hidden rounded-2xl border border-border/50 p-8">
+          <Image
+            src="/header-bg.jpg"
+            alt=""
+            fill
+            className="object-cover opacity-10"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
+          <div className="relative z-10">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -183,6 +201,7 @@ export default function HomePage() {
             ))}
           </motion.div>
         )}
+          </div>{/* end z-10 */}
       </section>
       </div>
     </div>
