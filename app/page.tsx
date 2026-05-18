@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { Trophy, TrendingUp, Users, CalendarDays } from "lucide-react";
+import { TrendingUp, Users, CalendarDays } from "lucide-react";
 import MatchCard from "@/components/MatchCard";
+import HeroSection from "@/components/HeroSection";
 import { Partido, Jugador } from "@/lib/data";
 
 export default function HomePage() {
@@ -71,92 +71,16 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-12">
-      {/* Hero Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-background border border-border p-8 md:p-12"
-      >
-        <Image
-          src="/header-bg.jpg"
-          alt="Waterpolo GER"
-          fill
-          className="object-cover opacity-15"
-          priority
-        />
-        <div className="relative z-10 max-w-2xl">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-primary"
-          >
-            <Trophy className="h-4 w-4" />
-            Temporada 2026
-          </motion.div>
+    <div>
+      <HeroSection
+        partidosCount={partidos.length}
+        jugadoresCount={jugadores.length}
+        topGoleadorGoles={statsJugadores[0]?.goles || 0}
+      />
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-4xl md:text-5xl font-bold leading-tight mb-4"
-          >
-            Waterpolo{" "}
-            <span className="text-primary">
-              GER
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-lg text-muted-foreground mb-6"
-          >
-            Gimnasia y Esgrima de Rosario. Los más grandes somos nosotros.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="flex flex-wrap gap-4"
-          >
-            <div className="flex items-center gap-2 rounded-lg bg-card/80 px-4 py-2 border border-border">
-              <CalendarDays className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm font-medium">{partidos.length}</p>
-                <p className="text-xs text-muted-foreground">Partidos</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 rounded-lg bg-card/80 px-4 py-2 border border-border">
-              <Users className="h-5 w-5 text-accent" />
-              <div>
-                <p className="text-sm font-medium">{jugadores.length}</p>
-                <p className="text-xs text-muted-foreground">Jugadores</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 rounded-lg bg-card/80 px-4 py-2 border border-border">
-              <TrendingUp className="h-5 w-5 text-yellow-500" />
-              <div>
-                <p className="text-sm font-medium">
-                  {statsJugadores[0]?.goles || 0}
-                </p>
-                <p className="text-xs text-muted-foreground">Goles líder</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Decorative elements */}
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-20 -right-10 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
-      </motion.section>
-
-      {/* Últimos Partidos */}
-      <section>
+      <div className="container mx-auto px-4 py-8 space-y-12">
+        {/* Últimos Partidos */}
+        <section>
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -260,6 +184,7 @@ export default function HomePage() {
           </motion.div>
         )}
       </section>
+      </div>
     </div>
   );
 }
