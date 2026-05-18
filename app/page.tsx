@@ -119,7 +119,15 @@ export default function HomePage() {
       </section>
 
       {/* Top Goleadores */}
-      <section>
+      <section className="relative overflow-hidden rounded-2xl p-8">
+        <Image
+          src="/jugador-3.jpg"
+          alt=""
+          fill
+          className="object-cover opacity-20"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
+        <div className="relative z-10">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -131,7 +139,7 @@ export default function HomePage() {
         </motion.div>
 
         {statsJugadores.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
+          <div className="p-8 text-center text-muted-foreground">
             <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p className="text-lg font-medium">No hay estadísticas</p>
             <p className="text-sm">
@@ -143,9 +151,8 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9 }}
-            className="rounded-xl border border-border bg-card overflow-hidden"
           >
-            <div className="grid grid-cols-12 gap-4 p-4 text-sm font-medium text-muted-foreground border-b border-border bg-muted/50">
+            <div className="grid grid-cols-12 gap-4 p-4 text-sm font-medium text-muted-foreground border-b border-white/10">
               <div className="col-span-1 text-center">#</div>
               <div className="col-span-7">Jugador</div>
               <div className="col-span-2 text-center">Partidos</div>
@@ -158,7 +165,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1 + index * 0.1 }}
-                className="grid grid-cols-12 gap-4 p-4 items-center border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors"
+                className="grid grid-cols-12 gap-4 p-4 items-center border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors"
               >
                 <div className="col-span-1 text-center">
                   <span
@@ -193,6 +200,7 @@ export default function HomePage() {
             ))}
           </motion.div>
         )}
+        </div>{/* end z-10 */}
       </section>
       </div>
     </div>
