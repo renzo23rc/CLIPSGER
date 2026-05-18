@@ -86,7 +86,7 @@ export default function HomePage() {
             src="/jugador-1.jpg"
             alt=""
             fill
-            className="object-cover opacity-10"
+            className="object-cover opacity-20"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
           <div className="relative z-10">
@@ -124,7 +124,7 @@ export default function HomePage() {
             src="/jugador-2.jpg"
             alt=""
             fill
-            className="object-cover opacity-10"
+            className="object-cover opacity-20"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
           <div className="relative z-10">
