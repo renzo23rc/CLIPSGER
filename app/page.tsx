@@ -83,7 +83,7 @@ export default function HomePage() {
         {/* Últimos Partidos */}
         <section className="relative overflow-hidden rounded-2xl border border-border/50 p-8">
           <Image
-            src="/header-bg.jpg"
+            src="/jugador-1.jpg"
             alt=""
             fill
             className="object-cover opacity-10"
@@ -121,7 +121,7 @@ export default function HomePage() {
       {/* Top Goleadores */}
       <section className="relative overflow-hidden rounded-2xl border border-border/50 p-8">
           <Image
-            src="/header-bg.jpg"
+            src="/jugador-2.jpg"
             alt=""
             fill
             className="object-cover opacity-10"

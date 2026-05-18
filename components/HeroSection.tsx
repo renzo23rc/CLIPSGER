@@ -32,7 +32,7 @@ export default function HeroSection({
     <section className="relative overflow-hidden bg-gradient-to-b from-background via-[#0f1f45] to-background">
       {/* Fondo: foto del equipo */}
       <Image
-        src="/header-bg.jpg"
+        src="/tomi.jpg"
         alt="Waterpolo GER"
         fill
         className="object-cover opacity-20"
