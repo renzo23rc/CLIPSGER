@@ -119,15 +119,7 @@ export default function HomePage() {
       </section>
 
       {/* Top Goleadores */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/50 p-8">
-          <Image
-            src="/jugador-2.jpg"
-            alt=""
-            fill
-            className="object-cover opacity-20"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
-          <div className="relative z-10">
+      <section>
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -201,7 +193,6 @@ export default function HomePage() {
             ))}
           </motion.div>
         )}
-          </div>{/* end z-10 */}
       </section>
       </div>
     </div>
