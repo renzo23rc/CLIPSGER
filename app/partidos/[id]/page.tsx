@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
 import { Calendar, Trophy, FileText, ChevronLeft, Activity, Users, MessageSquare } from "lucide-react";
@@ -77,66 +76,56 @@ export default function PartidoDetallePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumb y Header con fondo de la fecha */}
-      <div className="relative overflow-hidden rounded-2xl mb-6">
-        <Image
-          src="/fecha4.jpg"
-          alt=""
-          fill
-          className="object-cover opacity-25"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/80" />
-        <div className="relative z-10 p-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+      {/* Breadcrumb y Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6"
+      >
+        <Link
+          href="/partidos"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
         >
-          <Link
-            href="/partidos"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Volver a partidos
-          </Link>
+          <ChevronLeft className="h-4 w-4" />
+          Volver a partidos
+        </Link>
 
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <Calendar className="h-4 w-4" />
-                <span>{fecha}</span>
-                <span className="text-border">|</span>
-                <span>{partido.torneo}</span>
-              </div>
-              <h1 className="text-3xl font-bold">
-                GER <span className="text-primary">vs</span> {partido.rival}
-              </h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+              <Calendar className="h-4 w-4" />
+              <span>{fecha}</span>
+              <span className="text-border">|</span>
+              <span>{partido.torneo}</span>
             </div>
-
-            <div className="flex items-center gap-3">
-              {partido.resultado && (
-                <div className="flex items-center gap-2 rounded-lg bg-primary/20 px-4 py-2 backdrop-blur-sm">
-                  <Trophy className="h-5 w-5 text-primary" />
-                  <span className="text-xl font-bold text-primary">
-                    {partido.resultado}
-                  </span>
-                </div>
-              )}
-              <button
-                onClick={() => setShowPlanilla(!showPlanilla)}
-                className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors backdrop-blur-sm ${
-                  showPlanilla
-                    ? "bg-primary border-primary text-primary-foreground"
-                    : "border-border bg-card/80 hover:bg-muted"
-                }`}
-              >
-                <FileText className="h-4 w-4" />
-                Planilla
-              </button>
-            </div>
+            <h1 className="text-3xl font-bold">
+              GER <span className="text-primary">vs</span> {partido.rival}
+            </h1>
           </div>
-        </motion.div>
+
+          <div className="flex items-center gap-3">
+            {partido.resultado && (
+              <div className="flex items-center gap-2 rounded-lg bg-primary/20 px-4 py-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                <span className="text-xl font-bold text-primary">
+                  {partido.resultado}
+                </span>
+              </div>
+            )}
+            <button
+              onClick={() => setShowPlanilla(!showPlanilla)}
+              className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                showPlanilla
+                  ? "bg-primary border-primary text-primary-foreground"
+                  : "border-border bg-card hover:bg-muted"
+              }`}
+            >
+              <FileText className="h-4 w-4" />
+              Planilla
+            </button>
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Video */}
       <motion.div

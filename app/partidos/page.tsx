@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { CalendarDays } from "lucide-react";
 import MatchCard from "@/components/MatchCard";
@@ -26,21 +27,33 @@ export default function PartidosPage() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-8"
-      >
-        <div className="flex items-center gap-3 mb-2">
-          <CalendarDays className="h-7 w-7 text-primary" />
-          <h1 className="text-3xl font-bold">Partidos</h1>
+    <div>
+      <div className="relative overflow-hidden">
+        <Image
+          src="/fecha4.jpg"
+          alt=""
+          fill
+          className="object-cover opacity-25"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/80" />
+        <div className="relative z-10 container mx-auto px-4 py-16 md:py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <CalendarDays className="h-7 w-7 text-primary" />
+              <h1 className="text-3xl font-bold">Partidos</h1>
+            </div>
+            <p className="text-muted-foreground">
+              Todos los partidos de la temporada 2026
+            </p>
+          </motion.div>
         </div>
-        <p className="text-muted-foreground">
-          Todos los partidos de la temporada 2026
-        </p>
-      </motion.div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
 
       {loading ? (
         <div className="animate-pulse grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -63,6 +76,7 @@ export default function PartidosPage() {
           ))}
         </div>
       )}
+    </div>
     </div>
   );
 }
