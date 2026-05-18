@@ -12,17 +12,6 @@ interface HeroSectionProps {
 
 const stars = Array.from({ length: 13 }, (_, i) => i);
 
-const bubbles = [
-  { size: 16, left: "10%", delay: 0, duration: 6 },
-  { size: 12, left: "22%", delay: 1.2, duration: 7.5 },
-  { size: 20, left: "38%", delay: 2, duration: 5.5 },
-  { size: 8, left: "52%", delay: 0.5, duration: 8 },
-  { size: 14, left: "65%", delay: 1.8, duration: 6.5 },
-  { size: 10, left: "78%", delay: 3, duration: 7 },
-  { size: 18, left: "88%", delay: 2.5, duration: 5 },
-  { size: 6, left: "45%", delay: 0.8, duration: 9 },
-];
-
 export default function HeroSection({
   partidosCount,
   jugadoresCount,
@@ -43,30 +32,6 @@ export default function HeroSection({
       <div className="absolute -left-40 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute -right-40 top-1/3 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
       <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-background to-transparent" />
-      {bubbles.map((b, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-primary/10 backdrop-blur-sm"
-          style={{
-            width: b.size,
-            height: b.size,
-            left: b.left,
-            bottom: "5%",
-          }}
-          animate={{
-            y: [0, -300, -600],
-            x: [0, 20, -10, 15, 0],
-            opacity: [0, 0.6, 0],
-            scale: [1, 1.1, 0.8],
-          }}
-          transition={{
-            duration: b.duration,
-            repeat: Infinity,
-            delay: b.delay,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
