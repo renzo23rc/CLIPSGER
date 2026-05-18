@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Trophy, TrendingUp, Users, CalendarDays } from "lucide-react";
 import MatchCard from "@/components/MatchCard";
@@ -78,6 +79,13 @@ export default function HomePage() {
         transition={{ duration: 0.6 }}
         className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-background border border-border p-8 md:p-12"
       >
+        <Image
+          src="/header-bg.jpg"
+          alt="Waterpolo GER"
+          fill
+          className="object-cover opacity-15"
+          priority
+        />
         <div className="relative z-10 max-w-2xl">
           <motion.div
             initial={{ opacity: 0, x: -20 }}

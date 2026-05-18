@@ -23,16 +23,7 @@ export default function Header() {
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
       className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md"
     >
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <Image
-          src="/header-bg.jpg"
-          alt="Fondo header"
-          fill
-          className="object-cover opacity-20"
-          priority
-        />
-      </div>
-      <div className="container relative z-10 mx-auto flex h-16 items-center justify-between px-4">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/escudo.jpeg"
