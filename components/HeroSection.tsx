@@ -30,6 +30,15 @@ export default function HeroSection({
 }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-background via-[#0f1f45] to-background">
+      {/* Fondo: foto del equipo */}
+      <Image
+        src="/header-bg.jpg"
+        alt="Waterpolo GER"
+        fill
+        className="object-cover opacity-20"
+        priority
+      />
+
       {/* Decorative blur circles */}
       <div className="absolute -left-40 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute -right-40 top-1/3 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />

@@ -57,9 +57,9 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="animate-pulse space-y-4">
-          <div className="h-48 rounded-2xl bg-muted" />
+      <div className="animate-pulse">
+        <div className="h-[90vh] bg-muted" />
+        <div className="container mx-auto px-4 py-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-32 rounded-xl bg-muted" />
