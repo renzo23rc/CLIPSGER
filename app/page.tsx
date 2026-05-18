@@ -104,7 +104,7 @@ export default function HomePage() {
             className="text-4xl md:text-5xl font-bold leading-tight mb-4"
           >
             Waterpolo{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="text-primary">
               GER
             </span>
           </motion.h1>
@@ -115,8 +115,7 @@ export default function HomePage() {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="text-lg text-muted-foreground mb-6"
           >
-            Gimnasia y Esgrima de Rosario. Seguimos cada partido, cada jugada,
-            cada gol.
+            Los más grandes somos nosotros.
           </motion.p>
 
           <motion.div
