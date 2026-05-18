@@ -34,7 +34,7 @@ export default function PartidosPage() {
           alt=""
           fill
           className="object-cover opacity-25"
-          style={{ objectPosition: "center 35%" }}
+          style={{ objectPosition: "center 45%" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/80" />
         <div className="relative z-10 container mx-auto px-4 py-16 md:py-20">
