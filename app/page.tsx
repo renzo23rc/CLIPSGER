@@ -83,7 +83,7 @@ export default function HomePage() {
           src="/header-bg.jpg"
           alt="Waterpolo GER"
           fill
-          className="object-cover opacity-30"
+          className="object-cover opacity-15"
           priority
         />
         <div className="relative z-10 max-w-2xl">
