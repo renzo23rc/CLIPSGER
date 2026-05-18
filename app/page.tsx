@@ -115,7 +115,7 @@ export default function HomePage() {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="text-lg text-muted-foreground mb-6"
           >
-            Los más grandes somos nosotros.
+            Gimnasia y Esgrima de Rosario. Los más grandes somos nosotros.
           </motion.p>
 
           <motion.div
