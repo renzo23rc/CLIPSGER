@@ -370,14 +370,17 @@ function GestionarPartidosForm() {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="text-sm font-medium mb-1 block">URL de YouTube</label>
+            <label className="text-sm font-medium mb-1 block">Video (YouTube o Google Drive)</label>
             <input
               type="url"
               value={formData.youtubeUrl}
               onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder="https://www.youtube.com/watch?v=...  o  https://drive.google.com/file/d/..."
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Pegá un link de YouTube o de Google Drive (el archivo tiene que ser público)
+            </p>
           </div>
           <div className="md:col-span-2">
             <label className="text-sm font-medium mb-1 block">Planilla del partido (PDF)</label>
