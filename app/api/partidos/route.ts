@@ -11,7 +11,9 @@ export async function GET() {
             jugador: true,
           },
         },
-        comentarios: true,
+        comentarios: {
+          orderBy: [{ minuto: "asc" }, { createdAt: "desc" }],
+        },
       },
     });
     return NextResponse.json(partidos);

@@ -55,7 +55,7 @@ export async function createPartidoJugador(data: {
   bloqueos: number;
   exclusiones: number;
   turnovers: number;
-  tirosArco: number;
+  tirosTotales: number;
   atajadas: number;
 }) {
   try {
@@ -73,7 +73,7 @@ export async function createPartidoJugador(data: {
         bloqueos: data.bloqueos,
         exclusiones: data.exclusiones,
         turnovers: data.turnovers,
-        tirosArco: data.tirosArco,
+        tirosTotales: data.tirosTotales,
         atajadas: data.atajadas,
       },
       create: {
@@ -85,7 +85,7 @@ export async function createPartidoJugador(data: {
         bloqueos: data.bloqueos,
         exclusiones: data.exclusiones,
         turnovers: data.turnovers,
-        tirosArco: data.tirosArco,
+        tirosTotales: data.tirosTotales,
         atajadas: data.atajadas,
       },
     });
@@ -123,7 +123,9 @@ export async function getPartidos() {
             jugador: true,
           },
         },
-        comentarios: true,
+        comentarios: {
+          orderBy: [{ minuto: "asc" }, { createdAt: "desc" }],
+        },
       },
     });
     return { success: true, partidos };

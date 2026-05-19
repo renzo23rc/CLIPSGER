@@ -75,7 +75,7 @@ export default function JugadorDetallePage() {
   let bloqueos = 0;
   let exclusiones = 0;
   let turnovers = 0;
-  let tirosArco = 0;
+  let tirosTotales = 0;
   let atajadas = 0;
   let partidosJugados = 0;
 
@@ -88,7 +88,7 @@ export default function JugadorDetallePage() {
       bloqueos += stats.bloqueos;
       exclusiones += stats.exclusiones;
       turnovers += stats.turnovers;
-      tirosArco += stats.tirosArco;
+      tirosTotales += stats.tirosTotales;
       atajadas += stats.atajadas;
       partidosJugados++;
       return true;
@@ -172,7 +172,7 @@ export default function JugadorDetallePage() {
           { label: "Robos", value: robos, icon: Shield, color: "text-green-400" },
           { label: "Bloqueos", value: bloqueos, icon: Activity, color: "text-purple-400" },
           { label: "Atajadas", value: atajadas, icon: Activity, color: "text-emerald-400" },
-          { label: "Tiros al Arco", value: tirosArco, icon: Target, color: "text-cyan-400" },
+          { label: "Tiros Totales", value: tirosTotales, icon: Target, color: "text-cyan-400" },
           { label: "Exclusiones", value: exclusiones, icon: Activity, color: "text-red-400" },
         ].map((stat, index) => {
           const Icon = stat.icon;

@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
     const comentarios = await prisma.comentario.findMany({
       where: { partidoId },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ minuto: "asc" }, { createdAt: "desc" }],
     });
     return NextResponse.json(comentarios);
   } catch (error) {

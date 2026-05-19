@@ -710,7 +710,7 @@ function CargarStatsForm() {
     bloqueos: 0,
     exclusiones: 0,
     turnovers: 0,
-    tirosArco: 0,
+    tirosTotales: 0,
     atajadas: 0,
   });
   const [loading, setLoading] = useState(false);
@@ -738,7 +738,7 @@ function CargarStatsForm() {
           bloqueos: 0,
           exclusiones: 0,
           turnovers: 0,
-          tirosArco: 0,
+          tirosTotales: 0,
           atajadas: 0,
         });
         return;
@@ -756,7 +756,7 @@ function CargarStatsForm() {
           bloqueos: result.stats.bloqueos,
           exclusiones: result.stats.exclusiones,
           turnovers: result.stats.turnovers,
-          tirosArco: result.stats.tirosArco,
+          tirosTotales: result.stats.tirosTotales,
           atajadas: result.stats.atajadas,
         });
       } else {
@@ -768,7 +768,7 @@ function CargarStatsForm() {
           bloqueos: 0,
           exclusiones: 0,
           turnovers: 0,
-          tirosArco: 0,
+          tirosTotales: 0,
           atajadas: 0,
         });
       }
@@ -876,7 +876,7 @@ function CargarStatsForm() {
             { label: "Bloqueos", key: "bloqueos" },
             { label: "Exclusiones", key: "exclusiones" },
             { label: "Turnovers", key: "turnovers" },
-            { label: "Tiros al Arco", key: "tirosArco" },
+            { label: "Tiros Totales", key: "tirosTotales" },
             { label: "Atajadas", key: "atajadas" },
           ].map((stat) => (
             <div key={stat.key}>

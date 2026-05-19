@@ -55,7 +55,16 @@ export default function CommentSection({ comentarios: initialComments, partidoId
 
       if (res.ok) {
         const savedComment = await res.json();
-        setComments([savedComment, ...comments]);
+        setComments(prev => {
+          const updated = [...prev, savedComment];
+          updated.sort((a, b) => {
+            if (a.minuto === 0 && b.minuto === 0) return 0;
+            if (a.minuto === 0) return 1;
+            if (b.minuto === 0) return -1;
+            return a.minuto - b.minuto;
+          });
+          return updated;
+        });
         setTexto("");
         setMinuto("");
       } else {
@@ -139,7 +148,13 @@ export default function CommentSection({ comentarios: initialComments, partidoId
       <div className="space-y-3">
         <AnimatePresence>
           {comments
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .sort((a, b) => {
+              // minuto=0 (sin timestamp) va al final
+              if (a.minuto === 0 && b.minuto === 0) return 0;
+              if (a.minuto === 0) return 1;
+              if (b.minuto === 0) return -1;
+              return a.minuto - b.minuto;
+            })
             .map((comentario, index) => (
             <motion.div
               key={comentario.id}

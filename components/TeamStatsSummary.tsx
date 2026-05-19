@@ -16,12 +16,12 @@ export default function TeamStatsSummary({ jugadores }: TeamStatsSummaryProps) {
     bloqueos: jugadores.reduce((sum, j) => sum + j.bloqueos, 0),
     exclusiones: jugadores.reduce((sum, j) => sum + j.exclusiones, 0),
     turnovers: jugadores.reduce((sum, j) => sum + j.turnovers, 0),
-    tirosArco: jugadores.reduce((sum, j) => sum + j.tirosArco, 0),
+    tirosTotales: jugadores.reduce((sum, j) => sum + j.tirosTotales, 0),
     atajadas: jugadores.reduce((sum, j) => sum + j.atajadas, 0),
   };
 
-  const efectividad = totales.tirosArco > 0
-    ? ((totales.goles / totales.tirosArco) * 100).toFixed(1)
+  const efectividad = totales.tirosTotales > 0
+    ? ((totales.goles / totales.tirosTotales) * 100).toFixed(1)
     : "—";
 
   const jugadoresQueAnotaron = jugadores.filter((j) => j.goles > 0).length;
@@ -31,7 +31,7 @@ export default function TeamStatsSummary({ jugadores }: TeamStatsSummaryProps) {
   const stats = [
     { label: "Goles", value: totales.goles, icon: Goal, color: "text-yellow-500", bg: "bg-yellow-500/10" },
     { label: "Asistencias", value: totales.asistencias, icon: Activity, color: "text-blue-400", bg: "bg-blue-400/10" },
-    { label: "Tiros al Arco", value: totales.tirosArco, icon: Target, color: "text-cyan-400", bg: "bg-cyan-400/10" },
+    { label: "Tiros Totales", value: totales.tirosTotales, icon: Target, color: "text-cyan-400", bg: "bg-cyan-400/10" },
     { label: "Efectividad", value: efectividad === "—" ? "—" : `${efectividad}%`, icon: Trophy, color: "text-emerald-400", bg: "bg-emerald-400/10" },
     { label: "Robos", value: totales.robos, icon: Shield, color: "text-green-400", bg: "bg-green-400/10" },
     { label: "Bloqueos", value: totales.bloqueos, icon: Swords, color: "text-purple-400", bg: "bg-purple-400/10" },
