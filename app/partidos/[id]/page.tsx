@@ -7,6 +7,7 @@ import { Calendar, Trophy, FileText, ChevronLeft, Activity, Users, MessageSquare
 import Link from "next/link";
 import VideoPlayer from "@/components/VideoPlayer";
 import StatsTable from "@/components/StatsTable";
+import TeamStatsSummary from "@/components/TeamStatsSummary";
 import RosterList from "@/components/RosterList";
 import CommentSection from "@/components/CommentSection";
 import PlanillaViewer from "@/components/PlanillaViewer";
@@ -189,11 +190,14 @@ export default function PartidoDetallePage() {
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
-              <div className="p-4 border-b border-border">
-                <h2 className="font-bold text-lg">Estadísticas del Partido</h2>
+            <div className="space-y-4">
+              <TeamStatsSummary jugadores={partido.jugadores} />
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
+                <div className="p-4 border-b border-border">
+                  <h2 className="font-bold text-lg">Estadísticas Individuales</h2>
+                </div>
+                <StatsTable jugadores={partido.jugadores} />
               </div>
-              <StatsTable jugadores={partido.jugadores} />
             </div>
           </motion.div>
         )}
