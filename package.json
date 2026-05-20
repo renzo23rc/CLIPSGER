@@ -10,7 +10,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "fix-posiciones": "npx tsx scripts/fix-posiciones.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -34,6 +35,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "playwright": "^1.60.0",
     "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.1",

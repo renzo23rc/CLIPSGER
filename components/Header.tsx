@@ -45,7 +45,7 @@ export default function Header() {
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold leading-tight">Waterpolo GER</h1>
+              <span className="text-xl font-bold leading-tight">Waterpolo GER</span>
               <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary ring-1 ring-primary/30">
                 <Trophy className="h-3 w-3" />
                 13x

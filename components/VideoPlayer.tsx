@@ -97,7 +97,7 @@ export default function VideoPlayer({ youtubeUrl, startTime = 0 }: VideoPlayerPr
   const embedUrl =
     source.type === "youtube"
       ? `https://www.youtube.com/embed/${source.id}?start=${startTime}`
-      : `https://drive.google.com/file/d/${source.id}/preview`;
+      : `https://drive.usercontent.google.com/download?id=${source.id}&export=view`;
 
   return (
     <motion.div
