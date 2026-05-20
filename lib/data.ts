@@ -27,7 +27,7 @@ export interface PartidoJugador {
   robos: number;
   bloqueos: number;
   exclusiones: number;
-  turnovers: number;
+  perdidas: number;
   tirosTotales: number;
   atajadas: number;
 }

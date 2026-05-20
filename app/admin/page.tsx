@@ -709,7 +709,7 @@ function CargarStatsForm() {
     robos: 0,
     bloqueos: 0,
     exclusiones: 0,
-    turnovers: 0,
+    perdidas: 0,
     tirosTotales: 0,
     atajadas: 0,
   });
@@ -737,7 +737,7 @@ function CargarStatsForm() {
           robos: 0,
           bloqueos: 0,
           exclusiones: 0,
-          turnovers: 0,
+          perdidas: 0,
           tirosTotales: 0,
           atajadas: 0,
         });
@@ -755,7 +755,7 @@ function CargarStatsForm() {
           robos: result.stats.robos,
           bloqueos: result.stats.bloqueos,
           exclusiones: result.stats.exclusiones,
-          turnovers: result.stats.turnovers,
+          perdidas: result.stats.perdidas,
           tirosTotales: result.stats.tirosTotales,
           atajadas: result.stats.atajadas,
         });
@@ -767,7 +767,7 @@ function CargarStatsForm() {
           robos: 0,
           bloqueos: 0,
           exclusiones: 0,
-          turnovers: 0,
+          perdidas: 0,
           tirosTotales: 0,
           atajadas: 0,
         });
@@ -875,7 +875,7 @@ function CargarStatsForm() {
             { label: "Robos", key: "robos" },
             { label: "Bloqueos", key: "bloqueos" },
             { label: "Exclusiones", key: "exclusiones" },
-            { label: "Turnovers", key: "turnovers" },
+            { label: "Pérdidas", key: "perdidas" },
             { label: "Tiros Totales", key: "tirosTotales" },
             { label: "Atajadas", key: "atajadas" },
           ].map((stat) => (

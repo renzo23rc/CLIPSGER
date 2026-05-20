@@ -15,7 +15,7 @@ export default function TeamStatsSummary({ jugadores }: TeamStatsSummaryProps) {
     robos: jugadores.reduce((sum, j) => sum + j.robos, 0),
     bloqueos: jugadores.reduce((sum, j) => sum + j.bloqueos, 0),
     exclusiones: jugadores.reduce((sum, j) => sum + j.exclusiones, 0),
-    turnovers: jugadores.reduce((sum, j) => sum + j.turnovers, 0),
+    perdidas: jugadores.reduce((sum, j) => sum + j.perdidas, 0),
     tirosTotales: jugadores.reduce((sum, j) => sum + j.tirosTotales, 0),
     atajadas: jugadores.reduce((sum, j) => sum + j.atajadas, 0),
   };
@@ -36,7 +36,7 @@ export default function TeamStatsSummary({ jugadores }: TeamStatsSummaryProps) {
     { label: "Robos", value: totales.robos, icon: Shield, color: "text-green-400", bg: "bg-green-400/10" },
     { label: "Bloqueos", value: totales.bloqueos, icon: Swords, color: "text-purple-400", bg: "bg-purple-400/10" },
     { label: "Exclusiones", value: totales.exclusiones, icon: AlertTriangle, color: "text-red-400", bg: "bg-red-400/10" },
-    { label: "Pérdidas", value: totales.turnovers, icon: AlertTriangle, color: "text-orange-400", bg: "bg-orange-400/10" },
+    { label: "Pérdidas", value: totales.perdidas, icon: AlertTriangle, color: "text-orange-400", bg: "bg-orange-400/10" },
     { label: "Atajadas", value: totales.atajadas, icon: Eye, color: "text-emerald-400", bg: "bg-emerald-400/10" },
   ];
 

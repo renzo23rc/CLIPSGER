@@ -18,7 +18,7 @@ export default function StatsTable({ jugadores }: StatsTableProps) {
     { key: "robos", label: "R", color: "text-green-400" },
     { key: "bloqueos", label: "B", color: "text-purple-400" },
     { key: "exclusiones", label: "E", color: "text-red-400" },
-    { key: "turnovers", label: "T", color: "text-orange-400" },
+    { key: "perdidas", label: "P", color: "text-orange-400" },
     { key: "tirosTotales", label: "TOT", color: "text-cyan-400" },
     { key: "atajadas", label: "ATJ", color: "text-emerald-400" },
   ];
@@ -70,7 +70,7 @@ export default function StatsTable({ jugadores }: StatsTableProps) {
               <td className={`p-3 text-center ${stats[2].color}`}>{pj.robos}</td>
               <td className={`p-3 text-center ${stats[3].color}`}>{pj.bloqueos}</td>
               <td className={`p-3 text-center ${stats[4].color}`}>{pj.exclusiones}</td>
-              <td className={`p-3 text-center ${stats[5].color}`}>{pj.turnovers}</td>
+              <td className={`p-3 text-center ${stats[5].color}`}>{pj.perdidas}</td>
               <td className={`p-3 text-center ${stats[6].color}`}>{pj.tirosTotales}</td>
               <td className={`p-3 text-center ${stats[7].color}`}>{pj.atajadas}</td>
             </motion.tr>

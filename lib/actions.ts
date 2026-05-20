@@ -54,7 +54,7 @@ export async function createPartidoJugador(data: {
   robos: number;
   bloqueos: number;
   exclusiones: number;
-  turnovers: number;
+  perdidas: number;
   tirosTotales: number;
   atajadas: number;
 }) {
@@ -72,7 +72,7 @@ export async function createPartidoJugador(data: {
         robos: data.robos,
         bloqueos: data.bloqueos,
         exclusiones: data.exclusiones,
-        turnovers: data.turnovers,
+        perdidas: data.perdidas,
         tirosTotales: data.tirosTotales,
         atajadas: data.atajadas,
       },
@@ -84,7 +84,7 @@ export async function createPartidoJugador(data: {
         robos: data.robos,
         bloqueos: data.bloqueos,
         exclusiones: data.exclusiones,
-        turnovers: data.turnovers,
+        perdidas: data.perdidas,
         tirosTotales: data.tirosTotales,
         atajadas: data.atajadas,
       },

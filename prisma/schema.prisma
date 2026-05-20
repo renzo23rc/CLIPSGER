@@ -42,7 +42,7 @@ model PartidoJugador {
   robos       Int     @default(0)
   bloqueos    Int     @default(0)
   exclusiones Int     @default(0)
-  turnovers   Int     @default(0)
+  perdidas    Int     @default(0) @map("turnovers")
   tirosTotales   Int     @default(0) @map("tiros_arco")
   atajadas    Int     @default(0)
   jugador     Jugador @relation(fields: [jugadorId], references: [id], onDelete: Cascade)

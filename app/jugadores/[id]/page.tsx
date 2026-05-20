@@ -74,7 +74,7 @@ export default function JugadorDetallePage() {
   let robos = 0;
   let bloqueos = 0;
   let exclusiones = 0;
-  let turnovers = 0;
+  let perdidas = 0;
   let tirosTotales = 0;
   let atajadas = 0;
   let partidosJugados = 0;
@@ -87,7 +87,7 @@ export default function JugadorDetallePage() {
       robos += stats.robos;
       bloqueos += stats.bloqueos;
       exclusiones += stats.exclusiones;
-      turnovers += stats.turnovers;
+      perdidas += stats.perdidas;
       tirosTotales += stats.tirosTotales;
       atajadas += stats.atajadas;
       partidosJugados++;
