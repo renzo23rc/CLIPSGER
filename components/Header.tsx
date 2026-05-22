@@ -4,12 +4,13 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Trophy, Users, Calendar, Settings } from "lucide-react";
+import { Trophy, Users, Calendar, Settings, TrendingUp } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Inicio", icon: Trophy },
   { href: "/partidos", label: "Partidos", icon: Calendar },
   { href: "/jugadores", label: "Jugadores", icon: Users },
+  { href: "/estadisticas", label: "Estadísticas", icon: TrendingUp },
   { href: "/admin", label: "Admin", icon: Settings },
 ];
 
