@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   TrendingUp,
   Trophy,
@@ -225,6 +226,7 @@ const PIE_COLORS = ["#c9a84c", "#60a5fa", "#34d399", "#a78bfa", "#f472b6", "#6b7
 export default function EstadisticasPage() {
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [loading, setLoading] = useState(true);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     async function loadData() {
@@ -249,9 +251,10 @@ export default function EstadisticasPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+        whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="mb-8"
       >
         <div className="flex items-center gap-3 mb-2">
@@ -302,9 +305,10 @@ export default function EstadisticasPage() {
             {topScorer && (
               <div className="grid gap-4 md:grid-cols-3">
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ delay: 0.1, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                   className="rounded-xl border border-border bg-card p-5"
                 >
                   <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
@@ -321,9 +325,10 @@ export default function EstadisticasPage() {
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ delay: 0.2, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                   className="rounded-xl border border-border bg-card p-5"
                 >
                   <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
@@ -339,9 +344,10 @@ export default function EstadisticasPage() {
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ delay: 0.3, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                   className="rounded-xl border border-border bg-card p-5"
                 >
                   <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
@@ -359,9 +365,10 @@ export default function EstadisticasPage() {
             )}
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+              whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.25, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
               className="rounded-xl border border-border bg-card overflow-hidden"
             >
               <div className="p-4 border-b border-border">
@@ -397,9 +404,10 @@ export default function EstadisticasPage() {
                     {jugadoresStats.map((stats, index) => (
                       <motion.tr
                         key={stats.jugadorId}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.03 }}
+                        initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateX(-10px)" }}
+                        whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateX(0px)" }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.05, duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
                         <td className="p-3 whitespace-nowrap">
@@ -503,13 +511,20 @@ export default function EstadisticasPage() {
           {/* ─── Por partido ─── */}
           <TabsContent value="partido" className="space-y-6">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+              whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
             >
               <div className="grid gap-6 md:grid-cols-2">
                 {/* Bar chart: goles por partido */}
-                <div className="rounded-xl border border-border bg-card p-4">
+                <motion.div
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                  className="rounded-xl border border-border bg-card p-4"
+                >
                   <h3 className="text-sm font-medium text-muted-foreground mb-4">
                     Goles por partido
                   </h3>
@@ -535,10 +550,16 @@ export default function EstadisticasPage() {
                       <Bar dataKey="goles" fill="#c9a84c" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </motion.div>
 
                 {/* Line chart: tendencia de goles */}
-                <div className="rounded-xl border border-border bg-card p-4">
+                <motion.div
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.5, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+                  className="rounded-xl border border-border bg-card p-4"
+                >
                   <h3 className="text-sm font-medium text-muted-foreground mb-4">
                     Tendencia de goles
                   </h3>
@@ -572,11 +593,17 @@ export default function EstadisticasPage() {
                       />
                     </LineChart>
                   </ResponsiveContainer>
-                </div>
+                </motion.div>
               </div>
 
               {/* Tabla resumen por partido */}
-              <div className="mt-6 rounded-xl border border-border bg-card overflow-hidden">
+              <motion.div
+                initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+                whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                className="mt-6 rounded-xl border border-border bg-card overflow-hidden"
+              >
                 <div className="p-4 border-b border-border">
                   <h3 className="text-lg font-semibold">Resumen por partido</h3>
                 </div>
@@ -597,9 +624,10 @@ export default function EstadisticasPage() {
                       {partidoAggs.map((pa, i) => (
                         <motion.tr
                           key={pa.partidoId}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.02 }}
+                          initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateX(-10px)" }}
+                          whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateX(0px)" }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.05, duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                           className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                         >
                           <td className="p-3 font-medium whitespace-nowrap">{pa.rival}</td>
@@ -621,20 +649,27 @@ export default function EstadisticasPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           </TabsContent>
 
           {/* ─── Totales ─── */}
           <TabsContent value="totales" className="space-y-6">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+              whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
             >
               {/* MVP card */}
               {topScorer && (
-                <div className="rounded-xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/5 to-transparent p-5 mb-6">
+                <motion.div
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                  className="rounded-xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/5 to-transparent p-5 mb-6"
+                >
                   <div className="flex items-center gap-3">
                     <Trophy className="h-8 w-8 text-yellow-500" />
                     <div>
@@ -646,7 +681,7 @@ export default function EstadisticasPage() {
                       <p className="text-sm text-muted-foreground">goles</p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Stat cards */}
@@ -663,9 +698,10 @@ export default function EstadisticasPage() {
                 ].map((stat, i) => (
                   <motion.div
                     key={stat.label}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.05 }}
+                    initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "scale(0.95)" }}
+                    whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "scale(1)" }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05, duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                     className={`rounded-lg ${stat.bg} border border-border/50 p-3 text-center`}
                   >
                     <div className={`text-lg font-bold ${stat.color}`}>{stat.value}</div>
@@ -676,7 +712,13 @@ export default function EstadisticasPage() {
 
               {/* Pie chart: distribución de goles + extra info */}
               <div className="grid gap-6 md:grid-cols-2">
-                <div className="rounded-xl border border-border bg-card p-4">
+                <motion.div
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                  className="rounded-xl border border-border bg-card p-4"
+                >
                   <h3 className="text-sm font-medium text-muted-foreground mb-4">
                     Distribución de goles
                   </h3>
@@ -723,13 +765,14 @@ export default function EstadisticasPage() {
                       />
                     </PieChart>
                   </ResponsiveContainer>
-                </div>
+                </motion.div>
 
                 <div className="space-y-3">
                   <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
+                    initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateX(20px)" }}
+                    whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateX(0px)" }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ delay: 0.2, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                     className="rounded-xl border border-border bg-card p-5"
                   >
                     <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
@@ -761,9 +804,10 @@ export default function EstadisticasPage() {
                   </motion.div>
 
                   <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
+                    initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateX(20px)" }}
+                    whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateX(0px)" }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ delay: 0.3, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                     className="rounded-xl border border-border bg-card p-5"
                   >
                     <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">

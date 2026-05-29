@@ -6,12 +6,14 @@ import { motion } from "framer-motion";
 import { TrendingUp, Users, CalendarDays } from "lucide-react";
 import MatchCard from "@/components/MatchCard";
 import HeroSection from "@/components/HeroSection";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Partido, Jugador } from "@/lib/data";
 
 export default function HomePage() {
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [jugadores, setJugadores] = useState<Jugador[]>([]);
   const [loading, setLoading] = useState(true);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     async function loadData() {
@@ -59,11 +61,17 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="animate-pulse">
-        <div className="h-[90vh] bg-muted" />
-        <div className="container mx-auto px-4 py-8">
+        <div className="h-[90vh] rounded-b-2xl bg-muted" />
+        <div className="container mx-auto px-4 py-8 space-y-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 rounded-xl bg-muted" />
+              <div key={i} className="h-40 rounded-2xl border border-border/50 bg-muted" />
+            ))}
+          </div>
+          <div className="space-y-4 rounded-2xl border border-border/50 p-6 bg-muted/50">
+            <div className="h-8 w-48 rounded-lg bg-muted" />
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-12 rounded-lg bg-muted" />
             ))}
           </div>
         </div>
@@ -81,7 +89,13 @@ export default function HomePage() {
 
       <div className="container mx-auto px-4 py-8 space-y-12">
         {/* Últimos Partidos */}
-        <section className="relative overflow-hidden rounded-2xl border border-border/50 p-8">
+        <motion.section
+          initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+          whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+          className="relative overflow-hidden rounded-2xl border border-border/50 p-8"
+        >
           <Image
             src="/jugador-1.jpg"
             alt=""
@@ -90,36 +104,42 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
           <div className="relative z-10">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mb-6 flex items-center gap-3"
-        >
-          <CalendarDays className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold">Últimos Partidos</h2>
-        </motion.div>
+            <motion.div
+              initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateX(-20px)" }}
+              animate={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateX(0px)" }}
+              transition={{ delay: 0.6, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              className="mb-6 flex items-center gap-3"
+            >
+              <CalendarDays className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold">Últimos Partidos</h2>
+            </motion.div>
 
-        {partidos.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-            <CalendarDays className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p className="text-lg font-medium">No hay partidos cargados</p>
-            <p className="text-sm">
-              Andá al panel de admin para cargar tu primer partido
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {ultimosPartidos.map((partido, index) => (
-              <MatchCard key={partido.id} partido={partido} index={index} />
-            ))}
-          </div>
-        )}
+            {partidos.length === 0 ? (
+              <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
+                <CalendarDays className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p className="text-lg font-medium">No hay partidos cargados</p>
+                <p className="text-sm">
+                  Andá al panel de admin para cargar tu primer partido
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {ultimosPartidos.map((partido, index) => (
+                  <MatchCard key={partido.id} partido={partido} index={index} />
+                ))}
+              </div>
+            )}
           </div>{/* end z-10 */}
-      </section>
+        </motion.section>
 
       {/* Top Goleadores */}
-      <section className="relative overflow-hidden rounded-2xl p-8">
+      <motion.section
+        initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+        whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        className="relative overflow-hidden rounded-2xl p-8"
+      >
         <Image
           src="/jugador-3.jpg"
           alt=""
@@ -128,80 +148,86 @@ export default function HomePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
         <div className="relative z-10">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.8 }}
-          className="mb-6 flex items-center gap-3"
-        >
-          <TrendingUp className="h-6 w-6 text-yellow-500" />
-          <h2 className="text-2xl font-bold">Top Goleadores</h2>
-        </motion.div>
-
-        {statsJugadores.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p className="text-lg font-medium">No hay estadísticas</p>
-            <p className="text-sm">
-              Cargá stats de jugadores desde el panel de admin
-            </p>
-          </div>
-        ) : (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
+            initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateX(-20px)" }}
+            animate={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateX(0px)" }}
+            transition={{ delay: 0.8, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            className="mb-6 flex items-center gap-3"
           >
-            <div className="grid grid-cols-12 gap-4 p-4 text-sm font-medium text-muted-foreground border-b border-white/10">
-              <div className="col-span-1 text-center">#</div>
-              <div className="col-span-7">Jugador</div>
-              <div className="col-span-2 text-center">Partidos</div>
-              <div className="col-span-2 text-center">Goles</div>
-            </div>
-
-            {statsJugadores.map((stat, index) => (
-              <motion.div
-                key={stat.jugador.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 1 + index * 0.1 }}
-                className="grid grid-cols-12 gap-4 p-4 items-center border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors"
-              >
-                <div className="col-span-1 text-center">
-                  <span
-                    className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
-                      index === 0
-                        ? "bg-yellow-500/20 text-yellow-500"
-                        : index === 1
-                        ? "bg-gray-400/20 text-gray-400"
-                        : index === 2
-                        ? "bg-orange-700/20 text-orange-700"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {index + 1}
-                  </span>
-                </div>
-                <div className="col-span-7">
-                  <p className="font-medium">{stat.jugador.nombre}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {stat.jugador.posiciones.join(", ")}
-                  </p>
-                </div>
-                <div className="col-span-2 text-center text-muted-foreground">
-                  {stat.partidosJugados}
-                </div>
-                <div className="col-span-2 text-center">
-                  <span className="text-lg font-bold text-primary">
-                    {stat.goles}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+            <TrendingUp className="h-6 w-6 text-yellow-500" />
+            <h2 className="text-2xl font-bold">Top Goleadores</h2>
           </motion.div>
-        )}
+
+          {statsJugadores.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="text-lg font-medium">No hay estadísticas</p>
+              <p className="text-sm">
+                Cargá stats de jugadores desde el panel de admin
+              </p>
+            </div>
+          ) : (
+            <motion.div
+              initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
+              whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <div className="grid grid-cols-12 gap-4 p-4 text-sm font-medium text-muted-foreground border-b border-white/10">
+                <div className="col-span-1 text-center">#</div>
+                <div className="col-span-7">Jugador</div>
+                <div className="col-span-2 text-center">Partidos</div>
+                <div className="col-span-2 text-center">Goles</div>
+              </div>
+
+              {statsJugadores.map((stat, index) => (
+                <motion.div
+                  key={stat.jugador.id}
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateX(-10px)" }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateX(0px)" }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: index * 0.05,
+                    duration: 0.4,
+                    ease: [0.23, 1, 0.32, 1],
+                  }}
+                  className="grid grid-cols-12 gap-4 p-4 items-center border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors"
+                >
+                  <div className="col-span-1 text-center">
+                    <span
+                      className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
+                        index === 0
+                          ? "bg-yellow-500/20 text-yellow-500"
+                          : index === 1
+                          ? "bg-gray-400/20 text-gray-400"
+                          : index === 2
+                          ? "bg-orange-700/20 text-orange-700"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                  </div>
+                  <div className="col-span-7">
+                    <p className="font-medium">{stat.jugador.nombre}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {stat.jugador.posiciones.join(", ")}
+                    </p>
+                  </div>
+                  <div className="col-span-2 text-center text-muted-foreground">
+                    {stat.partidosJugados}
+                  </div>
+                  <div className="col-span-2 text-center">
+                    <span className="text-lg font-bold text-primary">
+                      {stat.goles}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>{/* end z-10 */}
-      </section>
+      </motion.section>
       </div>
     </div>
   );

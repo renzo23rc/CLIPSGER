@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Trophy, Users, Calendar, Settings, TrendingUp } from "lucide-react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const navItems = [
   { href: "/", label: "Inicio", icon: Trophy },
@@ -16,12 +17,19 @@ const navItems = [
 
 export default function Header() {
   const pathname = usePathname();
+  const reduced = useReducedMotion();
+
+  const springHeader = { type: "spring" as const, duration: 0.5, bounce: 0.2 };
 
   return (
     <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      initial={
+        reduced
+          ? { opacity: 0 }
+          : { transform: "translateY(-100px)" }
+      }
+      animate={{ transform: "translateY(0)", opacity: 1 }}
+      transition={reduced ? { duration: 0.3 } : springHeader}
       className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md"
     >
       {/* Subtle golden bottom border that fades in */}
@@ -67,7 +75,7 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                className={`nav-link-gate press-feedback group relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -77,10 +85,10 @@ export default function Header() {
                 <span className="hidden md:inline">{item.label}</span>
                 {/* Animated underline */}
                 <span
-                  className={`absolute bottom-1 left-3 right-3 h-0.5 rounded-full transition-transform duration-300 origin-center ${
+                  className={`nav-underline-gate absolute bottom-1 left-3 right-3 h-0.5 rounded-full origin-center ${
                     isActive
                       ? "bg-primary scale-x-100"
-                      : "bg-primary/40 scale-x-0 group-hover:scale-x-100"
+                      : "bg-primary/40 scale-x-0"
                   }`}
                 />
               </Link>
