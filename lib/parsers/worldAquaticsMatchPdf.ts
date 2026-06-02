@@ -128,6 +128,7 @@ function parseTeamBlock(lines: string[], esLocal: boolean): AdvancedStatsEquipo 
   const playerLines: string[] = [];
   const goalieLines: string[] = [];
   let teamTotalsLine = "";
+  let timeoutValue = 0;
   let inGoalieSection = false;
 
   const startIdx = noColIdx + 1; // one after "No." row
@@ -155,12 +156,18 @@ function parseTeamBlock(lines: string[], esLocal: boolean): AdvancedStatsEquipo 
       continue;
     }
 
-    // Generic noise — be careful not to skip goalie rows that have trailing text
+    // Extract timeout value from goalie header line
+    if (inGoalieSection && /Timeouts/.test(line)) {
+      const tm = line.match(/Timeouts\s+(\d+)/);
+      if (tm) timeoutValue = parseInt(tm[1]);
+      continue;
+    }
+
+    // Generic noise
     if (/^\s*Cap\s+\s*$|^\s*Saves\/Shots\s*$/i.test(line)) continue;
     if (/^(Timeouts|Exclusions?\s+(with|w\/)|Exclusions?\s+after)/i.test(line)) continue;
 
     // Player/goalie row? Starts with optional *, then digits, then name
-    // Note: goalie rows may have only 1 space between number and name
     const isRow = /^\s*\*?\s*\d{1,2}\s+[A-ZÁÉÍÓÚÜÑ'][a-záéíóúüñ]/i.test(line);
     if (!isRow) continue;
 
@@ -173,7 +180,7 @@ function parseTeamBlock(lines: string[], esLocal: boolean): AdvancedStatsEquipo 
 
   const jugadores = playerLines.map((l) => parsePlayerRow(l));
   const arqueros = goalieLines.map((l) => parseGoalieRow(l));
-  const equipo = parseTeamTotals(teamTotalsLine);
+  const equipo = parseTeamTotals(teamTotalsLine, timeoutValue);
 
   return {
     nombre,
@@ -499,6 +506,62 @@ function parseGoalieRow(line: string): AdvancedStatsArquero {
   };
 }
 
-function parseTeamTotals(_line: string): AdvancedStatsTeamTotals {
-  return defaultTeamTotals();
+function parseTeamTotals(line: string, timeoutValue: number = 0): AdvancedStatsTeamTotals {
+  if (!line) return defaultTeamTotals();
+
+  // Position-based foul extraction for team totals line.
+  // The totals line has specific column positions for each foul type.
+  // Derived from actual data: TO=113, ST=118, RB=123, BL=128, SP=132, 
+  // CP=139, FP=144, DS=148, M6=152, CS=156, DE=160, P=164, EX=168
+  // Fixed positions for total line fouls (calibrated from ARG/CRO data).
+  const TEAM_FOUL_COLS: Record<string, [number, number]> = {
+    TO: [110, 115],
+    ST: [115, 120],
+    RB: [120, 126],
+    BL: [126, 131],
+    SP: [131, 137],
+    CP: [137, 142],
+    FP: [142, 148],
+    P: [150, 160],
+    EX: [160, 999],
+  };
+
+  const result: Record<string, number> = {};
+  let sprintRatio: [number, number] | null = null;
+
+  for (const [key, [start, end]] of Object.entries(TEAM_FOUL_COLS)) {
+    const raw = line.substring(start, Math.min(end, line.length)).trim();
+    if (!raw) continue;
+    const slashIdx = raw.indexOf('/');
+    let val: number;
+    if (slashIdx >= 0) {
+      val = parseInt(raw.substring(0, slashIdx));
+      const den = parseInt(raw.substring(slashIdx + 1));
+      if (!isNaN(val) && !isNaN(den) && key === 'SP') {
+        sprintRatio = [val, den];
+      }
+    } else {
+      val = parseInt(raw);
+    }
+    if (!isNaN(val)) result[key] = val;
+  }
+
+  const sprints = sprintRatio ? { ganados: sprintRatio[0], total: sprintRatio[1] } : null;
+
+  // Total shots from the line
+  const allShotPairs = findAllShotPairs(line, 40).filter(p => p.index < 120);
+  const totalG = allShotPairs.length > 0 ? parseShotPair(allShotPairs[0].match) : null;
+
+  return {
+    goles: totalG?.goles ?? 0,
+    tiros: totalG?.tiros ?? 0,
+    robos: result["ST"] ?? 0,
+    rebotes: result["RB"] ?? 0,
+    bloqueos: result["BL"] ?? 0,
+    sprints,
+    timeouts: timeoutValue,
+    exclusiones: { conSustitucion: 0, sinSustitucion4min: 0 },
+    doblesExclusiones: result["DE"] ?? 0,
+    penalesCometidos: result["P"] ?? 0,
+  };
 }
