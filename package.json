@@ -10,7 +10,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && prisma db push --skip-generate --accept-data-loss 2>&1 || true",
     "fix-posiciones": "npx tsx scripts/fix-posiciones.ts"
   },
   "dependencies": {
