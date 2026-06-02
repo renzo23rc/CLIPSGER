@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Calendar, Trophy, ChevronRight } from "lucide-react";
-import { Partido } from "@/lib/data";
+import { Partido, AdvancedStatsV1 } from "@/lib/data";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface MatchCardProps {
@@ -49,7 +49,9 @@ export default function MatchCard({ partido, index = 0 }: MatchCardProps) {
               </div>
 
               <h3 className="text-xl font-bold text-foreground">
-                GER <span className="text-primary">vs</span> {partido.rival}
+                {(partido.advancedStatsJson as AdvancedStatsV1 | null)?.equipos?.[0]?.nombre || "GER"}
+                {" "}<span className="text-primary">vs</span>{" "}
+                {(partido.advancedStatsJson as AdvancedStatsV1 | null)?.equipos?.[1]?.nombre || partido.rival}
               </h3>
 
               {partido.resultado && (
