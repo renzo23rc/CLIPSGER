@@ -1,27 +1,20 @@
 /**
- * One-time endpoint to seed the ARG vs CRO test match.
- * Visit /api/seed-arg-cro after deploying to trigger it.
+ * Seed/re-parse the ARG vs CRO test match.
+ * - First visit: creates the match with advanced stats
+ * - Visit with ?reparse=true: re-parses and updates the stats
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseWorldAquaticsPdf } from "@/lib/parsers/worldAquaticsMatchPdf";
 import * as fs from "fs";
 import * as path from "path";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Check if already exists
-    const existing = await prisma.partido.findFirst({
-      where: { rival: "Croacia", torneo: { contains: "World Aquatics" } },
-    });
-    if (existing) {
-      return NextResponse.json({
-        message: "Match already exists",
-        id: existing.id,
-      });
-    }
+    const { searchParams } = new URL(request.url);
+    const reparse = searchParams.get("reparse") === "true";
 
-    // Read and parse the fixture
+    // Read fixture
     const fixturePath = path.join(
       process.cwd(),
       "lib",
@@ -29,18 +22,42 @@ export async function GET() {
       "fixtures",
       "arg-cro-2023.txt"
     );
-
     if (!fs.existsSync(fixturePath)) {
       return NextResponse.json(
         { error: "Fixture not found - deploy the latest code" },
         { status: 500 }
       );
     }
-
     const text = fs.readFileSync(fixturePath, "utf-8");
     const parsed = parseWorldAquaticsPdf(text);
 
-    // Create the match
+    const existing = await prisma.partido.findFirst({
+      where: { rival: "Croacia", torneo: { contains: "World Aquatics" } },
+    });
+
+    if (existing && !reparse) {
+      return NextResponse.json({
+        message: "Match already exists (use ?reparse=true to update)",
+        id: existing.id,
+      });
+    }
+
+    if (existing && reparse) {
+      const updated = await prisma.partido.update({
+        where: { id: existing.id },
+        data: {
+          advancedStatsJson: parsed as any,
+          advancedStatsSourceUrl: "/fixtures/arg-cro-2023.pdf",
+        },
+      });
+      return NextResponse.json({
+        message: "Match re-parsed successfully",
+        id: updated.id,
+        advancedStats: updated.advancedStatsJson,
+      });
+    }
+
+    // Create match
     const partido = await prisma.partido.create({
       data: {
         rival: "Croacia",
@@ -61,12 +78,9 @@ export async function GET() {
       hasAdvancedStats: !!partido.advancedStatsJson,
     });
   } catch (error) {
-    console.error("Error seeding match:", error);
+    console.error("Error:", error);
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Error seeding match",
-      },
+      { error: error instanceof Error ? error.message : "Error" },
       { status: 500 }
     );
   }
