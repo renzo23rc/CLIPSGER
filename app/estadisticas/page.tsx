@@ -243,10 +243,16 @@ export default function EstadisticasPage() {
     loadData();
   }, []);
 
-  const jugadoresStats = useMemo(() => computeJugadorStats(partidos), [partidos]);
+  // Solo partidos de GER (sin advancedStatsJson = partidos externos)
+  const gerPartidos = useMemo(
+    () => partidos.filter((p) => !p.advancedStatsJson),
+    [partidos]
+  );
+
+  const jugadoresStats = useMemo(() => computeJugadorStats(gerPartidos), [gerPartidos]);
   const topScorer = jugadoresStats[0];
-  const partidoAggs = useMemo(() => computePartidoAggs(partidos), [partidos]);
-  const teamTotals = useMemo(() => computeTeamTotals(partidos), [partidos]);
+  const partidoAggs = useMemo(() => computePartidoAggs(gerPartidos), [gerPartidos]);
+  const teamTotals = useMemo(() => computeTeamTotals(gerPartidos), [gerPartidos]);
 
   return (
     <div className="container mx-auto px-4 py-8">

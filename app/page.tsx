@@ -35,7 +35,8 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  const ultimosPartidos = partidos.slice(0, 3);
+  const gerPartidos = partidos.filter((p) => !p.advancedStatsJson);
+  const ultimosPartidos = gerPartidos.slice(0, 3);
 
   // Calcular top goleadores
   const statsJugadores = jugadores
@@ -43,7 +44,7 @@ export default function HomePage() {
       let goles = 0;
       let partidosJugados = 0;
 
-      partidos.forEach((partido) => {
+      gerPartidos.forEach((partido) => {
         const stats = partido.jugadores.find(
           (j) => j.jugador.id === jugador.id
         );
@@ -82,7 +83,7 @@ export default function HomePage() {
   return (
     <div>
       <HeroSection
-        partidosCount={partidos.length}
+        partidosCount={gerPartidos.length}
         jugadoresCount={jugadores.length}
         topGoleadorGoles={statsJugadores[0]?.goles || 0}
       />
@@ -114,7 +115,7 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold">Últimos Partidos</h2>
             </motion.div>
 
-            {partidos.length === 0 ? (
+            {gerPartidos.length === 0 ? (
               <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
                 <CalendarDays className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p className="text-lg font-medium">No hay partidos cargados</p>
