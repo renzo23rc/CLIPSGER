@@ -140,7 +140,9 @@ export default function PartidoDetallePage() {
               <span>{partido.torneo}</span>
             </div>
             <h1 className="text-3xl font-bold">
-              GER <span className="text-primary">vs</span> {partido.rival}
+              {(partido.advancedStatsJson as AdvancedStatsV1 | null)?.equipos?.[0]?.nombre || "GER"}
+              {" "}<span className="text-primary">vs</span>{" "}
+              {(partido.advancedStatsJson as AdvancedStatsV1 | null)?.equipos?.[1]?.nombre || partido.rival}
             </h1>
           </div>
 
