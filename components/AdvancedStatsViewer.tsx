@@ -163,6 +163,13 @@ function PlayerShotTable({ jugadores }: { jugadores: AdvancedStatsJugador[] }) {
                 <th key={st} className={`p-2 text-center font-medium ${SHOT_COLORS[st]}`}>{st}</th>
               ))}
             </tr>
+            <tr className="border-b border-border/50 bg-muted/30 text-[10px]">
+              <th colSpan={3} />
+              <th colSpan={2} className="p-1 text-center text-muted-foreground font-medium">G/Sh</th>
+              {shotTypes.map((st) => (
+                <th key={`sh-${st}`} className={`p-1 text-center text-muted-foreground font-medium ${SHOT_COLORS[st]}`}>G/Sh</th>
+              ))}
+            </tr>
           </thead>
           <tbody>
             {jugadores.map((j, idx) => {
@@ -195,6 +202,80 @@ function PlayerShotTable({ jugadores }: { jugadores: AdvancedStatsJugador[] }) {
                       </td>
                     );
                   })}
+                </motion.tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Personal Fouls */}
+      <FoulsTable jugadores={jugadores} />
+    </div>
+  );
+}
+
+const FOUL_LABELS: Record<string, string> = {
+  TO: "TO", ST: "ST", RB: "RB", BL: "BL", SP: "SP",
+  CP: "CP", FP: "FP", DS: "DS", M6: "M6",
+  CS: "CS", DE: "DE", P: "P", EX: "EX",
+};
+
+const FOUL_TOOLTIPS: Record<string, string> = {
+  TO: "Turnovers", ST: "Steals", RB: "Rebounds", BL: "Blocked shots",
+  SP: "Sprints", CP: "Centre forward exclusion", FP: "Field exclusion",
+  DS: "Driving exclusion", M6: "Exclusion 6m", CS: "Counterattack exclusion",
+  DE: "Double exclusion", P: "Penalty foul", EX: "Exclusion",
+};
+
+function FoulsTable({ jugadores }: { jugadores: AdvancedStatsJugador[] }) {
+  const foulKeys = ["TO", "ST", "RB", "BL", "SP", "CP", "FP", "DS", "M6", "CS", "DE", "P", "EX"];
+
+  // Check if any player has foul data
+  const hasFouls = jugadores.some((j) => Object.keys(j.faltas).length > 0);
+  if (!hasFouls) return null;
+
+  return (
+    <div className="mt-4">
+      <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+        Faltas personales
+      </h4>
+      <div className="overflow-x-auto rounded-lg border border-border/50">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-border bg-muted/50">
+              <th className="p-2 text-left font-medium text-muted-foreground w-8">#</th>
+              <th className="p-2 text-left font-medium text-muted-foreground">Jugador</th>
+              {foulKeys.map((key) => (
+                <th
+                  key={key}
+                  className="p-2 text-center font-medium text-muted-foreground cursor-help"
+                  title={FOUL_TOOLTIPS[key]}
+                >
+                  {FOUL_LABELS[key]}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {jugadores.map((j, idx) => {
+              const hasAny = foulKeys.some((k) => (j.faltas[k] ?? 0) > 0);
+              if (!hasAny) return null;
+              return (
+                <motion.tr
+                  key={`fouls-${idx}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: idx * 0.02 }}
+                  className="border-b border-border/20 hover:bg-muted/20 transition-colors"
+                >
+                  <td className="p-2 text-muted-foreground">{j.numero}</td>
+                  <td className="p-2 font-medium whitespace-nowrap">{j.nombre}</td>
+                  {foulKeys.map((key) => (
+                    <td key={key} className="p-2 text-center">
+                      {(j.faltas[key] ?? 0) > 0 ? j.faltas[key] : "—"}
+                    </td>
+                  ))}
                 </motion.tr>
               );
             })}
