@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
-import { Calendar, Trophy, FileText, ChevronLeft, Activity, Users, MessageSquare } from "lucide-react";
+import { Calendar, Trophy, FileText, ChevronLeft, Activity, Users, MessageSquare, BarChart3, Loader2, Upload } from "lucide-react";
 import Link from "next/link";
 import VideoPlayer from "@/components/VideoPlayer";
 import StatsTable from "@/components/StatsTable";
@@ -11,7 +11,8 @@ import TeamStatsSummary from "@/components/TeamStatsSummary";
 import RosterList from "@/components/RosterList";
 import CommentSection from "@/components/CommentSection";
 import PlanillaViewer from "@/components/PlanillaViewer";
-import { Partido } from "@/lib/data";
+import AdvancedStatsViewer from "@/components/AdvancedStatsViewer";
+import { Partido, AdvancedStatsV1 } from "@/lib/data";
 
 export default function PartidoDetallePage() {
   const params = useParams();
@@ -20,6 +21,9 @@ export default function PartidoDetallePage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("estadisticas");
   const [showPlanilla, setShowPlanilla] = useState(false);
+  const [parsingPdf, setParsingPdf] = useState(false);
+  const [advancedStats, setAdvancedStats] = useState<AdvancedStatsV1 | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadPartido() {
@@ -69,11 +73,47 @@ export default function PartidoDetallePage() {
     year: "numeric",
   });
 
+  const hasAdvanced = !!(advancedStats || partido?.advancedStatsJson);
+
   const tabs = [
     { id: "estadisticas", label: "Estadísticas", icon: Activity },
+    { id: "avanzadas", label: "Avanzadas", icon: BarChart3 },
     { id: "roster", label: "Roster", icon: Users },
     { id: "comentarios", label: "Comentarios", icon: MessageSquare },
   ];
+
+  async function parsePdf() {
+    if (!partido?.planillaUrl) return;
+    setParsingPdf(true);
+    setParseError(null);
+    try {
+      // Fetch the PDF text client-side
+      const pdfRes = await fetch(partido.planillaUrl);
+      const pdfBlob = await pdfRes.blob();
+      const pdfArrayBuf = await pdfBlob.arrayBuffer();
+
+      // We can't run pdftotext client-side, so send to API
+      // For now, use a server-side endpoint that accepts a URL
+      const res = await fetch(`/api/partidos/${partido.id}/advanced-stats`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pdfUrl: partido.planillaUrl }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Error al parsear PDF");
+      }
+
+      const updated = await res.json();
+      setAdvancedStats(updated.advancedStatsJson);
+      setActiveTab("avanzadas");
+    } catch (err) {
+      setParseError(err instanceof Error ? err.message : "Error al parsear PDF");
+    } finally {
+      setParsingPdf(false);
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -113,17 +153,33 @@ export default function PartidoDetallePage() {
                 </span>
               </div>
             )}
-            <button
-              onClick={() => setShowPlanilla(!showPlanilla)}
-              className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                showPlanilla
-                  ? "bg-primary border-primary text-primary-foreground"
-                  : "border-border bg-card hover:bg-muted"
-              }`}
-            >
-              <FileText className="h-4 w-4" />
-              Planilla
-            </button>
+            <div className="flex items-center gap-2">
+              {partido?.planillaUrl && !hasAdvanced && (
+                <button
+                  onClick={parsePdf}
+                  disabled={parsingPdf}
+                  className="inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+                >
+                  {parsingPdf ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  {parsingPdf ? "Parseando..." : "Parsear PDF"}
+                </button>
+              )}
+              <button
+                onClick={() => setShowPlanilla(!showPlanilla)}
+                className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                  showPlanilla
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : "border-border bg-card hover:bg-muted"
+                }`}
+              >
+                <FileText className="h-4 w-4" />
+                Planilla
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -199,6 +255,35 @@ export default function PartidoDetallePage() {
                 <StatsTable jugadores={partido.jugadores} />
               </div>
             </div>
+          </motion.div>
+        )}
+
+        {activeTab === "avanzadas" && (
+          <motion.div
+            key="avanzadas"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {parseError && (
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 mb-4 text-sm text-red-400">
+                {parseError}
+              </div>
+            )}
+            {hasAdvanced ? (
+              <AdvancedStatsViewer
+                stats={(advancedStats || partido?.advancedStatsJson) as AdvancedStatsV1}
+              />
+            ) : (
+              <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
+                <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p className="text-lg font-medium">Estadísticas avanzadas no disponibles</p>
+                <p className="text-sm">
+                  Subí una planilla PDF oficial de World Aquatics y toca "Parsear PDF" para ver estadísticas detalladas.
+                </p>
+              </div>
+            )}
           </motion.div>
         )}
 

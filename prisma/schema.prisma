@@ -26,6 +26,8 @@ model Partido {
   resultado    String?           @db.VarChar(20)
   youtubeUrl   String?           @map("youtube_url")
   planillaUrl  String?           @map("planilla_url")
+  advancedStatsJson Json?        @map("advanced_stats_json")
+  advancedStatsSourceUrl String?  @map("advanced_stats_source_url")
   createdAt    DateTime          @default(now()) @map("created_at")
   jugadores    PartidoJugador[]
   comentarios  Comentario[]
