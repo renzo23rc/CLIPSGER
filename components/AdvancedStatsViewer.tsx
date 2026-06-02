@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import {
   Target, Shield, Swords, Goal, Eye, Activity,
-  BarChart3, TrendingUp, Timer,
+  BarChart3, TrendingUp, Timer, BookOpen,
 } from "lucide-react";
 import type {
   AdvancedStatsV1,
@@ -24,7 +24,63 @@ export default function AdvancedStatsViewer({ stats }: Props) {
       {stats.equipos.map((equipo, i) => (
         <EquipoSection key={i} equipo={equipo} index={i} />
       ))}
+      <LegendSection />
     </div>
+  );
+}
+
+function LegendSection() {
+  const legendItems = [
+    { code: "A", desc: "Action shot — tiro en jugada abierta" },
+    { code: "C", desc: "Centre shot — tiro del centro (boya)" },
+    { code: "D", desc: "Driving shot — tiro en penetración" },
+    { code: "X", desc: "Extra player shot — tiro en superioridad numérica" },
+    { code: "6m", desc: "6 metre shot — tiro libre directo desde 6m" },
+    { code: "PS", desc: "Penalty shot — penal de 5m" },
+    { code: "CA", desc: "Counter attack shot — tiro de contraataque" },
+    { code: "AA", desc: "All action shots — suma de A + C + D + 6m + CA" },
+    { code: "EPS", desc: "Extra Player Situation — situación de power play" },
+    { code: "TO", desc: "Turnover — pérdida de posesión" },
+    { code: "ST", desc: "Steal — robo de pelota" },
+    { code: "RB", desc: "Rebound — rebote" },
+    { code: "BL", desc: "Blocked shot — bloqueo de tiro" },
+    { code: "SP", desc: "Sprint — sprint ganado / total (salto inicial)" },
+    { code: "CP", desc: "Centre forward position exclusion — exclusión del boya" },
+    { code: "FP", desc: "Field exclusion — exclusión en el campo" },
+    { code: "DS", desc: "Driving situation exclusion — exclusión en penetración" },
+    { code: "M6", desc: "Exclusion in 6m — exclusión en tiro libre de 6m" },
+    { code: "CS", desc: "Counter attacking exclusion — exclusión en contraataque" },
+    { code: "DE", desc: "Double exclusion — doble exclusión" },
+    { code: "P", desc: "Penalty foul — falta que concede penal" },
+    { code: "EX", desc: "Exclusion — exclusión temporal (S: con cambio, N: sin cambio 4')" },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, duration: 0.4 }}
+      className="rounded-xl border border-border bg-card overflow-hidden"
+    >
+      <details className="group">
+        <summary className="flex items-center gap-2 p-4 cursor-pointer hover:bg-muted/20 transition-colors">
+          <BookOpen className="h-4 w-4 text-primary shrink-0" />
+          <span className="text-sm font-semibold">Guía de abreviaturas</span>
+          <span className="ml-auto text-xs text-muted-foreground group-open:hidden">Expandir</span>
+          <span className="ml-auto text-xs text-muted-foreground hidden group-open:inline">Cerrar</span>
+        </summary>
+        <div className="px-4 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1">
+            {legendItems.map((item) => (
+              <div key={item.code} className="flex gap-2 py-0.5 text-xs">
+                <code className="font-bold text-primary shrink-0 w-8">{item.code}</code>
+                <span className="text-muted-foreground">{item.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </details>
+    </motion.div>
   );
 }
 
