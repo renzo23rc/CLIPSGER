@@ -234,90 +234,126 @@ function computeTeamTotals(partidos: Partido[]): TeamTotals {
 
 const PIE_COLORS = ["#c9a84c", "#60a5fa", "#34d399", "#a78bfa", "#f472b6", "#6b7280"];
 
-const MEDAL_COLORS = ["text-yellow-500", "text-gray-400", "text-orange-700"];
+const rankingStats = [
+  { key: "goles", label: "Goles", color: "text-yellow-500" },
+  { key: "asistencias", label: "Asistencias", color: "text-blue-400" },
+  { key: "robos", label: "Robos", color: "text-green-400" },
+  { key: "bloqueos", label: "Bloqueos", color: "text-purple-400" },
+  { key: "exclusiones", label: "Exclusiones", color: "text-red-400" },
+  { key: "exclusionesGeneradas", label: "Exp. Gen.", color: "text-rose-400" },
+  { key: "perdidas", label: "Pérdidas", color: "text-orange-400" },
+  { key: "tirosTotales", label: "Tiros", color: "text-cyan-400" },
+  { key: "atajadas", label: "Atajadas", color: "text-emerald-400" },
+  { key: "efectividad", label: "Efectividad", color: "text-emerald-400" },
+  { key: "partidosJugados", label: "PJ", color: "text-muted-foreground" },
+];
 
-function topN(
-  stats: JugadorStats[],
-  key: keyof JugadorStats,
-  n: number = 3
-): JugadorStats[] {
-  return [...stats].sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, n);
+function sortJugadores(jugadoresStats: JugadorStats[], key: string): JugadorStats[] {
+  if (key === "efectividad") {
+    return [...jugadoresStats]
+      .filter((j) => j.tirosTotales >= 3)
+      .sort((a, b) => ((b.goles / b.tirosTotales) * 100) - ((a.goles / a.tirosTotales) * 100));
+  }
+  return [...jugadoresStats].sort((a, b) => (b[key as keyof JugadorStats] as number) - (a[key as keyof JugadorStats] as number));
 }
 
-function buildLeaderboardCards(jugadoresStats: JugadorStats[], reduceMotion: boolean) {
-  const leaderboards: {
-    key: keyof JugadorStats | "efectividad";
-    label: string;
-    color: string;
-    bg: string;
-  }[] = [
-    { key: "robos", label: "Robos", color: "text-green-400", bg: "bg-green-400/10" },
-    { key: "bloqueos", label: "Bloqueos", color: "text-purple-400", bg: "bg-purple-400/10" },
-    { key: "asistencias", label: "Asistencias", color: "text-blue-400", bg: "bg-blue-400/10" },
-    { key: "exclusionesGeneradas", label: "Exp. Generadas", color: "text-rose-400", bg: "bg-rose-400/10" },
-    { key: "goles", label: "Goles", color: "text-yellow-500", bg: "bg-yellow-500/10" },
-    { key: "efectividad", label: "Efectividad", color: "text-emerald-400", bg: "bg-emerald-400/10" },
-  ];
+function RankingSection({
+  jugadoresStats,
+  selectedRank,
+  setSelectedRank,
+  shouldReduceMotion,
+}: {
+  jugadoresStats: JugadorStats[];
+  selectedRank: string;
+  setSelectedRank: (k: string) => void;
+  shouldReduceMotion: boolean;
+}) {
+  const sorted = sortJugadores(jugadoresStats, selectedRank);
+  const statDef = rankingStats.find((s) => s.key === selectedRank)!;
 
-  return leaderboards.map((lb, idx) => {
-    const top3 = lb.key === "efectividad"
-      ? [...jugadoresStats]
-          .filter((j) => j.tirosTotales >= 3)
-          .sort((a, b) => (b.tirosTotales > 0 ? (b.goles / b.tirosTotales) : 0) - (a.tirosTotales > 0 ? (a.goles / a.tirosTotales) : 0))
-          .slice(0, 3)
-      : topN(jugadoresStats, lb.key as keyof JugadorStats, 3);
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <h3 className="text-lg font-semibold mb-1">Tabla de rankings</h3>
+      <p className="text-sm text-muted-foreground mb-3">
+        Ranking completo por estadística — seleccioná una categoría
+      </p>
 
-    return (
-      <motion.div
-        key={lb.key}
-        initial={reduceMotion ? undefined : { opacity: 0, transform: "scale(0.95)" }}
-        whileInView={reduceMotion ? undefined : { opacity: 1, transform: "scale(1)" }}
-        viewport={{ once: true }}
-        transition={{ delay: idx * 0.05, duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-        className={`rounded-lg ${lb.bg} border border-border/50 p-3`}
-      >
-        <h4 className={`text-xs font-semibold uppercase tracking-wider ${lb.color} mb-2`}>
-          {lb.label}
-        </h4>
-        {top3.length === 0 ? (
-          <p className="text-[11px] text-muted-foreground">Sin datos</p>
-        ) : (
-          <div className="space-y-1.5">
-            {top3.map((j, rank) => {
-              const valor = lb.key === "efectividad"
-                ? `${((j.goles / j.tirosTotales) * 100).toFixed(0)}%`
-                : String(j[lb.key as keyof JugadorStats] ?? 0);
-              const avg = j.partidosJugados > 0 && lb.key !== "efectividad"
-                ? ((j[lb.key as keyof JugadorStats] as number) / j.partidosJugados).toFixed(1)
-                : null;
-              return (
-                <div key={j.jugadorId} className="flex items-center justify-between gap-1">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className={`text-xs font-bold shrink-0 ${MEDAL_COLORS[rank]}`}>
-                      #{rank + 1}
-                    </span>
-                    <span className="text-xs truncate">{j.nombre.split(" ")[0]}</span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <span className={`text-xs font-bold ${lb.color}`}>{valor}</span>
-                    {avg && (
-                      <span className="text-[10px] text-muted-foreground">({avg})</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </motion.div>
-    );
-  });
+      {/* Selector de estadística */}
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {rankingStats.map((s) => (
+          <button
+            key={s.key}
+            onClick={() => setSelectedRank(s.key)}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
+              selectedRank === s.key
+                ? `${s.color} border-current bg-current/10`
+                : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tabla de ranking */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-border bg-muted/50">
+              <th className="p-2.5 text-left text-xs font-medium text-muted-foreground w-10">#</th>
+              <th className="p-2.5 text-left text-xs font-medium text-muted-foreground">Jugador</th>
+              <th className={`p-2.5 text-center text-xs font-medium ${statDef.color}`}>Total</th>
+              <th className="p-2.5 text-center text-xs font-medium text-muted-foreground">Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="p-4 text-center text-sm text-muted-foreground">
+                  {selectedRank === "efectividad"
+                    ? "Nadie tiene suficientes tiros (mín. 3)"
+                    : "Sin datos para esta estadística"}
+                </td>
+              </tr>
+            ) : (
+              sorted.map((j, i) => {
+                const total = selectedRank === "efectividad"
+                  ? `${((j.goles / j.tirosTotales) * 100).toFixed(0)}%`
+                  : (j[selectedRank as keyof JugadorStats] ?? 0);
+                const avg = selectedRank !== "efectividad" && j.partidosJugados > 0
+                  ? ((j[selectedRank as keyof JugadorStats] as number) / j.partidosJugados).toFixed(1)
+                  : selectedRank === "efectividad"
+                    ? `${((j.atajadas > 0 ? j.goles : 0) / Math.max(j.tirosTotales, 1) * 100).toFixed(1)}%`
+                    : "—";
+                return (
+                  <tr
+                    key={j.jugadorId}
+                    className="border-b border-border/30 hover:bg-muted/20 transition-colors"
+                  >
+                    <td className="p-2.5 text-sm font-bold text-muted-foreground">{i + 1}</td>
+                    <td className="p-2.5 text-sm font-medium">{j.nombre}</td>
+                    <td className={`p-2.5 text-center text-sm font-bold ${statDef.color}`}>
+                      {typeof total === "number" ? total : total}
+                    </td>
+                    <td className="p-2.5 text-center text-xs text-muted-foreground">
+                      {selectedRank === "efectividad" ? "—" : avg}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 export default function EstadisticasPage() {
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPartido, setExpandedPartido] = useState<string | null>(null);
+  const [selectedRank, setSelectedRank] = useState("goles");
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -462,23 +498,13 @@ export default function EstadisticasPage() {
               </div>
             )}
 
-            {/* ─── Top Rankings ─── */}
-            <motion.div
-              initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
-              whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.25, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <div className="rounded-xl border border-border bg-card p-4">
-                <h3 className="text-lg font-semibold mb-1">Top rankings</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Los mejores en cada estadística — total y promedio por partido
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {buildLeaderboardCards(jugadoresStats, shouldReduceMotion)}
-                </div>
-              </div>
-            </motion.div>
+            {/* ─── Ranking completo ─── */}
+            <RankingSection
+              jugadoresStats={jugadoresStats}
+              selectedRank={selectedRank}
+              setSelectedRank={setSelectedRank}
+              shouldReduceMotion={shouldReduceMotion}
+            />
 
             <motion.div
               initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
@@ -837,23 +863,13 @@ export default function EstadisticasPage() {
                 </div>
               </motion.div>
 
-              {/* ─── Rankings por partido ─── */}
-              <motion.div
-                initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
-                whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-              >
-                <div className="rounded-xl border border-border bg-card p-4">
-                  <h3 className="text-lg font-semibold mb-1">Top rankings</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Los mejores en cada estadística — total y promedio por partido
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                    {buildLeaderboardCards(jugadoresStats, shouldReduceMotion)}
-                  </div>
-                </div>
-              </motion.div>
+              {/* ─── Ranking completo ─── */}
+              <RankingSection
+                jugadoresStats={jugadoresStats}
+                selectedRank={selectedRank}
+                setSelectedRank={setSelectedRank}
+                shouldReduceMotion={shouldReduceMotion}
+              />
             </motion.div>
           </TabsContent>
 
@@ -1069,23 +1085,13 @@ export default function EstadisticasPage() {
               </div>
             </motion.div>
 
-            {/* ─── Rankings Totales ─── */}
-            <motion.div
-              initial={shouldReduceMotion ? undefined : { opacity: 0, transform: "translateY(20px)" }}
-              whileInView={shouldReduceMotion ? undefined : { opacity: 1, transform: "translateY(0px)" }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <div className="rounded-xl border border-border bg-card p-4">
-                <h3 className="text-lg font-semibold mb-1">Top rankings</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Los mejores en cada estadística — total y promedio por partido
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {buildLeaderboardCards(jugadoresStats, shouldReduceMotion)}
-                </div>
-              </div>
-            </motion.div>
+            {/* ─── Ranking completo ─── */}
+            <RankingSection
+              jugadoresStats={jugadoresStats}
+              selectedRank={selectedRank}
+              setSelectedRank={setSelectedRank}
+              shouldReduceMotion={shouldReduceMotion}
+            />
           </TabsContent>
         </Tabs>
       )}
